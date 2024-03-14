@@ -1,7 +1,14 @@
 {
     "files.exclude": {
+        ".gitignore": true,
         ".vscode": true,
         "bin": true,
         "obj": true
+    },
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.expand": false,
+    "explorer.fileNesting.patterns": {
+        "appsettings.json": "appsettings.*.json",
+        "*.razor": "*.razor.css"
     }
 }
