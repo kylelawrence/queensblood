@@ -1,0 +1,59 @@
+@page "/decks"
+
+<PageTitle>Queen's Blood - Manage Decks</PageTitle>
+
+<div id="decks-container">
+    <div id="decks-header">
+        <span>Your decks</span>
+        <button>1</button>
+        <button>2</button>
+        <button>3</button>
+        <button>4</button>
+        <button>5</button>
+        <span>Deck nickname:</span>
+        <input type="text" />
+    </div>
+
+    <div id="deck-cards"></div>
+
+    <div id="all-cards"></div>
+</div>
+
+<style>
+    #decks-container {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+    }
+
+    #decks-header {}
+
+    #decks-header>button {
+        border: solid 3px white;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        cursor: pointer;
+        margin: 0 5px;
+    }
+
+    #decks-header>input {
+        border: solid 2px white;
+        border-radius: 5px;
+        padding: 4px 2px;
+    }
+
+    #deck-cards {
+        margin-top: 10px;
+        border: solid 3px white;
+        border-radius: 10px;
+        height: 20%;
+    }
+
+    #all-cards {
+        flex-grow: 1;
+        margin-top: 10px;
+        border: solid 3px white;
+        border-radius: 10px;
+    }
+</style>
