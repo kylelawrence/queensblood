@@ -1,0 +1,111 @@
+<html>
+
+<head>
+    <title>QB - Boosts Tool</title>
+    <style>
+        body {
+            display: grid;
+            place-items: center;
+            background: #333;
+            color: #ddd;
+        }
+
+        #field {
+            margin-top: 25px;
+            width: fit-content;
+            display: grid;
+            grid-template-columns: auto auto auto auto auto;
+        }
+
+        #field>input {
+            width: 50px;
+            height: 50px;
+            background: transparent;
+        }
+
+        #field>input.boost {
+            background: gold;
+        }
+
+        #field>input.middle {
+            background: white;
+        }
+    </style>
+
+    <script>
+        function calculateBoostValue() {
+            const buttons = document.querySelectorAll('.boost');
+        }
+
+        function handleFieldClick(event) {
+            const button = event.target;
+            button.classList.toggle("boost");
+            calculateBoostValue();
+        }
+
+        function resetBoosts() {
+            const buttons = document.querySelectorAll('#field>input');
+            buttons.forEach((button) => button.classList.remove("boost"));
+            calculateBoostValue();
+        }
+
+        function onInit() {
+            const buttons = document.querySelectorAll('#field>input');
+            buttons.forEach((button) => {
+                if (button.id === "22") {
+                    button.addEventListener("click", resetBoosts);
+                } else {
+                    button.addEventListener("click", handleFieldClick);
+                }
+            })
+        }
+
+        document.addEventListener("DOMContentLoaded", onInit);
+    </script>
+</head>
+
+<body>
+    <form action="#">
+        <label>
+            <span>Boost value: </span>
+            <input type="text" id="boostsvalue" />
+        </label>
+        <label>
+            <span>Boost value: </span>
+            <input type="text" id="boostsvalue" />
+        </label>
+        <div id="field">
+            <input type="button" id="00" />
+            <input type="button" id="01" />
+            <input type="button" id="02" />
+            <input type="button" id="03" />
+            <input type="button" id="04" />
+
+            <input type="button" id="10" />
+            <input type="button" id="11" />
+            <input type="button" id="12" />
+            <input type="button" id="13" />
+            <input type="button" id="14" />
+
+            <input type="button" id="20" />
+            <input type="button" id="21" />
+            <input type="button" id="22" class="middle" />
+            <input type="button" id="23" />
+            <input type="button" id="24" />
+
+            <input type="button" id="30" />
+            <input type="button" id="31" />
+            <input type="button" id="32" />
+            <input type="button" id="33" />
+            <input type="button" id="34" />
+
+            <input type="button" id="40" />
+            <input type="button" id="41" />
+            <input type="button" id="42" />
+            <input type="button" id="43" />
+            <input type="button" id="44" />
+        </div>
+    </form>
+</body>
+
+</html>

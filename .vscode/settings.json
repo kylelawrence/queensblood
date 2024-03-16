@@ -9,6 +9,6 @@
     "explorer.fileNesting.expand": false,
     "explorer.fileNesting.patterns": {
         "appsettings.json": "appsettings.*.json",
-        "*.razor": "*.razor.css"
+        "*.razor": "${capture}.razor.css"
     }
 }

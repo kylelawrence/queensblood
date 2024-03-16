@@ -17,7 +17,7 @@
     top: 0.5rem;
 }
 
-#body-box {
+.body-box {
     margin: 15px;
     display: flex;
     position: fixed;

@@ -1,0 +1,32 @@
+<div class="card">
+    <div class="pin-count"></div>
+    <div class="value"></div>
+    <div class="star"></div>
+    <div class="field"></div>
+    <div class="name"></div>
+</div>
+
+<style>
+    .card {
+        border: solid 4px silver;
+        position: relative;
+        border-radius: 5px;
+    }
+</style>
+
+@code {
+    private string _name = "";
+    private int _cardID;
+    private int _pinCount;
+    private int _value;
+
+    [Parameter]
+    public int CardID
+    {
+        get => _cardID;
+        set
+        {
+            _cardID = value;
+        }
+    }
+}

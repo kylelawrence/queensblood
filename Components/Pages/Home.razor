@@ -2,14 +2,16 @@
 
 <PageTitle>Queen&#39;s Blood</PageTitle>
 
-<div id="home-box">
-    <h1 id="title">Queen&#39;s Blood</h1>
+<div class="home-box">
+    <h1 class="title">Queen&#39;s Blood</h1>
     <a href="/play">Start game</a>
     <a href="/decks">Manage decks</a>
+    <a href="/cards">Card editor</a>
 </div>
 
 <style>
-    #home-box {
+    .home-box {
+        padding-bottom: 5%;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -17,25 +19,25 @@
         justify-content: center;
     }
 
-    #title {
+    .title {
         font-family: luminari;
-        letter-spacing: 4px ;
+        letter-spacing: 4px;
     }
 
     a {
         width: 250px;
-        font-size: 24px;
-        border: solid 2px #333;
-        text-align: center;
         margin: 5px;
-        text-decoration: none;
         padding: 5px;
-        color: inherit;
+        border: solid 2px #999;
         border-radius: 8px;
+        font-size: 24px;
+        color: inherit;
+        text-align: center;
+        text-decoration: none;
     }
 
     a:hover {
-        border-color: #000;
+        border-color: #ddd;
         background: #444;
     }
 
