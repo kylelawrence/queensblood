@@ -13,20 +13,3 @@
         border-radius: 5px;
     }
 </style>
-
-@code {
-    private string _name = "";
-    private int _cardID;
-    private int _pinCount;
-    private int _value;
-
-    [Parameter]
-    public int CardID
-    {
-        get => _cardID;
-        set
-        {
-            _cardID = value;
-        }
-    }
-}
