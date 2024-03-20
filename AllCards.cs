@@ -1,6 +1,20 @@
 namespace queensblood;
 
-public record Card(uint ID, string Name, uint PinCount, uint Value, uint boosts);
+// public record Card(uint ID, string Name, uint PinCost, uint Value, uint Boosts);
+
+public class Card(uint id, string name, uint pinCost, uint value, uint boosts)
+{
+    public uint ID { get; set; } = id;
+    public string Name { get; set; } = name;
+    public uint PinCost { get; set; } = pinCost;
+    public uint Value { get; set; } = value;
+    public uint Boosts { get; set; } = boosts;
+
+    public static Card GetBlank()
+    {
+        return new(0, "Name", 1, 1, 1);
+    }
+}
 
 public class AllCards
 {

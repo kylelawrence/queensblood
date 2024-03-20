@@ -7,3 +7,8 @@ body {
 .debug {
     border: solid 1px red;
 }
+
+.middle {
+    display: grid;
+    place-items: center;
+}

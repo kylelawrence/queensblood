@@ -1,0 +1,101 @@
+<div class="card">
+    <div class="pin-cost">
+        @for (var i = 0; i < CardModel.PinCost; i++)
+        {
+            <img title="pin cost" src="/black-pawn.svg" />
+        }
+    </div>
+    <div class="value">@CardModel.Value</div>
+    <div class="field">
+        @for (var i = 0; i < 25; i++)
+        {
+            var middle = i == 12 ? "field-middle" : "";
+            var classList = $"{middle}";
+            <div class="@classList"></div>
+        }
+    </div>
+    <div class="name">
+        @CardModel.Name
+    </div>
+</div>
+
+<style>
+    .card {
+        min-height: 200px;
+        font-family: luminari;
+        letter-spacing: 2px;
+        background-color: #338;
+        position: relative;
+        aspect-ratio: 5/8;
+        border: solid 4px silver;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    .pin-cost {
+        position: absolute;
+        left: 3%;
+        top: 3%;
+        height: 30px;
+    }
+
+    .pin-cost>img {
+        height: 100%;
+        padding: 0;
+        margin: 0 5px 0 0;
+    }
+
+    .value {
+        position: absolute;
+        right: 1.5%;
+        top: 1.5%;
+        color: gold;
+        border: solid 3px gold;
+        border-radius: 50%;
+        font-weight: bold;
+        display: grid;
+        place-items: center;
+        aspect-ratio: 1;
+        height: 30px;
+        font-size: 20px;
+    }
+
+    .field {
+        aspect-ratio: 1;
+        height: 32%;
+        margin-bottom: 8%;
+        border: solid 2px silver;
+        border-radius: 8px;
+        display: grid;
+        padding: 3%;
+        grid-template-columns: auto auto auto auto auto;
+        gap: 2px;
+    }
+
+    .field>div {
+        border-radius: 3px;
+        background: #584839;
+    }
+
+    .field>div.field-middle {
+        background: #eee;
+    }
+
+    .name {
+        border-top: solid 2px silver;
+        display: grid;
+        place-items: center;
+        height: 15%;
+        width: 100%;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public Card CardModel { get; set; } = new Card(0, "Name", 1, 1, 1);
+
+    public int Height { get; set; } = 400;
+}

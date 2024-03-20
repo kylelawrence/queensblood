@@ -1,10 +1,18 @@
 using queensblood;
 using queensblood.Components;
 
+using MongoDB.Driver;
+
+var dbConnect = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING");
+var dbClient = new MongoClient(dbConnect);
+dbClient.GetDatabase("queensblood");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
+builder.Services
+    .AddSingleton(dbClient)
+    .AddRazorComponents()
     .AddInteractiveServerComponents();
 
 var app = builder.Build();
