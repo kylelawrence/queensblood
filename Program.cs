@@ -1,17 +1,19 @@
 using queensblood;
 using queensblood.Components;
 
-using MongoDB.Driver;
+// using MongoDB.Driver;
 
-var dbConnect = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING");
-var dbClient = new MongoClient(dbConnect);
-dbClient.GetDatabase("queensblood");
+// var dbConnect = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING");
+// var dbClient = new MongoClient(dbConnect);
+// var db = dbClient.GetDatabase("queensblood");
 
 var builder = WebApplication.CreateBuilder(args);
+var cardsService = new CardsService(CardsFileService.Instance);
 
 // Add services to the container.
 builder.Services
-    .AddSingleton(dbClient)
+    // .AddSingleton(db)
+    .AddSingleton<ICardsService>(cardsService)
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 

@@ -1,5 +1,4 @@
 @page "/cards"
-@inject MongoClient dbClient
 @rendermode InteractiveServer
 
 <div class="container">
@@ -110,10 +109,10 @@
 </style>
 
 @code {
-    private Card currentCard = Card.GetBlank();
+    private Card currentCard = new Card(0, "None", 1, 1, 1);
 
-    private void HandleCostDecrease() => currentCard.PinCost = Math.Max(1, currentCard.PinCost - 1);
-    private void HandleCostIncrease() => currentCard.PinCost = Math.Min(3, currentCard.PinCost + 1);
-    private void HandleValueDecrease() => currentCard.Value = Math.Max(1, currentCard.Value - 1);
-    private void HandleValueIncrease() => currentCard.Value = Math.Min(6, currentCard.Value + 1);
+    private void HandleCostDecrease() {}
+    private void HandleCostIncrease() {}
+    private void HandleValueDecrease() {}
+    private void HandleValueIncrease() {}
 }
