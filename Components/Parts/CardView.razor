@@ -12,8 +12,8 @@
             var index = i;
             var onClick = () => OnFieldClick(index);
 
-            var middle = index == 12 ? "field-middle" : "";
-            var boosted = CardModel.FieldIsBoosted(index) ? "field-boosted" : "";
+            var middle = this.MaybeClass("field-middle", index == 12);
+            var boosted = this.MaybeClass("field-boosted", CardModel.FieldIsBoosted(index));
             var classList = $"{middle} {boosted}";
 
             <div class="@classList" @onclick="onClick"></div>
