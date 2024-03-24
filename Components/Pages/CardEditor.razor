@@ -1,0 +1,122 @@
+@page "/cards"
+@rendermode InteractiveServer
+@inject ICardsService cardsService
+
+<div class="container">
+
+    <div class="all-cards">
+        @foreach (var card in cards)
+        {
+            <CardView Selected="@(card.Id == currentCard.Id)" CardModel="@card" OnClick="@ReplaceCard" />
+        }
+        <button type="button" @onclick="HandleAddButtonClick" title="Add card"
+            class="add-btn @(this.MaybeClass("selected", workingOnNew))">
+            <div>+</div>
+        </button>
+    </div>
+    <div class="middle">
+        <div class="card-editor">
+            @if (currentCard.Value == 0)
+            {
+                <div>Choose a card to edit</div>
+            }
+            else
+            {
+                <CardView CardModel="@currentCard" OnFieldClick="@HandleFieldClick" />
+                <div class="pic-btn-container">
+                    <input type="button" value="edit picture" />
+                </div>
+                <div class="pin-cost-edit">
+                    <input type="button" title="reduce cost" value="-" @onclick="HandleCostDecrease" />
+                    <input type="button" title="increase cost" value="+" @onclick="HandleCostIncrease" />
+                </div>
+                <div class="value-edit">
+                    <input type="button" title="reduce value" value="-" @onclick="HandleValueDecrease" />
+                    <input type="button" title="increase value" value="+" @onclick="HandleValueIncrease" />
+                </div>
+                @if (!workingOnNew)
+                {
+                    <input type="button" value="Delete card" class="delete-btn" @onclick="HandleDeleteClick" />
+                }
+                <input type="button" value="Save card" class="save-btn" @onclick="HandleSaveClick" />
+
+                <div class="name-input-container">
+                    <span>Name:</span>
+                    <InputText @bind-Value="CurrentCardName" maxlength="@CardHelper.MAX_NAME_LENGTH" />
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private Card currentCard = CardHelper.Null;
+
+    private bool workingOnNew;
+
+    private string CurrentCardName
+    {
+        get => currentCard.Name;
+        set => UpdateCard(name: value);
+    }
+
+    private ReadOnlyCollection<Card> cards = new(new List<Card>());
+
+    protected override void OnInitialized()
+    {
+        cards = cardsService.GetAllCards();
+    }
+
+    private void HandleAddButtonClick()
+    {
+        workingOnNew = true;
+        currentCard = CardHelper.Blank;
+        StateHasChanged();
+    }
+
+    private async void HandleSaveClick()
+    {
+        var result = await cardsService.UpsertCard(currentCard, workingOnNew);
+        currentCard = result.Card;
+        workingOnNew = false;
+        RefreshCards();
+    }
+
+    private async void HandleDeleteClick()
+    {
+        if (workingOnNew) return;
+
+        var result = await cardsService.DeleteCard(currentCard);
+        currentCard = CardHelper.Null;
+        RefreshCards();
+    }
+
+    private void RefreshCards()
+    {
+        cards = cardsService.GetAllCards();
+        StateHasChanged();
+    }
+
+    private void HandleCostDecrease() => UpdateCard(pinCost: currentCard.PinCost - 1);
+    private void HandleCostIncrease() => UpdateCard(pinCost: currentCard.PinCost + 1);
+    private void HandleValueDecrease() => UpdateCard(value: currentCard.Value - 1);
+    private void HandleValueIncrease() => UpdateCard(value: currentCard.Value + 1);
+
+    private void HandleFieldClick(int index)
+    {
+        currentCard = currentCard.ToggleBoost(index);
+        StateHasChanged();
+    }
+
+    private void ReplaceCard(Card card)
+    {
+        workingOnNew = false;
+        currentCard = card;
+        StateHasChanged();
+    }
+    private void UpdateCard(string name = "", int pinCost = 0, int value = 0)
+    {
+        CardHelper.Change(ref currentCard, name, pinCost, value);
+        StateHasChanged();
+    }
+}

@@ -1,97 +1,55 @@
 using System.Collections.ObjectModel;
-using Microsoft.AspNetCore.Components;
+using System.Diagnostics;
+using MongoDB.Bson;
+using MongoDB.Driver;
 
 namespace queensblood;
 
-public record Card(int ID, string Name, int PinCost, int Value, int Boosts);
+public record Card(ObjectId Id, string Name, int PinCost, int Value, int Boosts);
 
 public interface ICardsService
 {
-    public ReadOnlyDictionary<int, Card> AllCards { get; }
-    public void AddCard(string name, int pinCost, int value, int boosts);
-    public void UpdateCard(int id, string name, int pinCost, int value, int boosts);
-    public void DeleteCard(int id);
-    public Task<bool> SaveCards();
+    public ReadOnlyCollection<Card> GetAllCards();
+    public Task<ChangeResult> UpsertCard(Card card, bool isNew);
+    public Task<bool> DeleteCard(Card card);
 }
 
-public class CardsService : ICardsService
+public record ChangeResult(Card Card, bool Success);
+
+public class CardsMongoService : ICardsService
 {
-    public const string ALL_CARDS_FILES = "wwwroot/cards.tsv";
-    public const char CARDS_DEF_SEPARATOR = '\t';
-    private const StringSplitOptions splitOptions = StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
+    private static readonly ReplaceOptions replaceOptions = new() { IsUpsert = true };
+    private readonly IMongoDatabase db;
+    private readonly IMongoCollection<Card> collection;
 
-    private int nextCardID = 0;
-
-    private readonly Dictionary<int, Card> allCards;
-
-    public ReadOnlyDictionary<int, Card> AllCards { get; private set; }
-
-    public CardsService(ICardsFileService fileService)
+    public CardsMongoService(IMongoDatabase database)
     {
-        // Failing to read the cards file should just fail the whole app.
-        var lines = File.Exists(ALL_CARDS_FILES) ? File.ReadAllLines(ALL_CARDS_FILES) : [];
-        var cards = new Dictionary<int, Card>(lines.Length);
-        var maxCardID = 0;
-        foreach (var line in lines)
-        {
-            var parts = line.Split(CARDS_DEF_SEPARATOR, splitOptions);
-            if (parts.Length != 4) continue;
-            try
-            {
-                var id = int.Parse(parts[0]);
-                var name = parts[1];
-                var pinCost = int.Parse(parts[2]);
-                var value = int.Parse(parts[3]);
-                var boosts = int.Parse(parts[4]);
-                ClampDetails(ref name, ref pinCost, ref value);
-                cards[id] = new(id, name, pinCost, value, boosts);
-                if (id > maxCardID)
-                {
-                    maxCardID = id;
-                }
-            }
-            catch { }
-        }
-
-        nextCardID = maxCardID + 1;
-        allCards = cards;
-        AllCards = allCards.AsReadOnly();
+        db = database;
+        collection = db.GetCollection<Card>("cards");
     }
 
-    public void AddCard(string name, int pinCost, int value, int boosts)
+    public ReadOnlyCollection<Card> GetAllCards()
     {
-        ClampDetails(ref name, ref pinCost, ref value);
-        allCards[nextCardID] = new(nextCardID, name, pinCost, value, boosts);
-        nextCardID++;
+        return collection.AsQueryable().ToList().AsReadOnly();
     }
 
-    public void UpdateCard(int id, string name, int pinCost, int value, int boosts)
+    public async Task<ChangeResult> UpsertCard(Card card, bool isNew)
     {
-        ClampDetails(ref name, ref pinCost, ref value);
-        allCards[id] = new(id, name, pinCost, value, boosts);
+        // Clamp the values, just in case
+        CardHelper.Change(ref card, pinCost: 0);
+
+        var builder = Builders<Card>.Filter;
+        var filter = isNew ? builder.Eq(c => c.Value, 0) : builder.Eq(c => c.Id, card.Id);
+        var result = await collection.ReplaceOneAsync(filter, card, replaceOptions);
+        var newId = result.UpsertedId != null ? result.UpsertedId.AsObjectId : card.Id;
+        var updated = new Card(newId, card.Name, card.PinCost, card.Value, card.Boosts);
+        return new(updated, true);
     }
 
-    public void DeleteCard(int id)
+    public async Task<bool> DeleteCard(Card card)
     {
-        allCards.Remove(id);
-    }
-
-    public async Task<bool> SaveCards()
-    {
-        var lines = allCards.Select(pair =>
-        {
-            var card = pair.Value;
-            var line = $"{card.ID}\t{card.Name}\t{card.PinCost}\t{card.Value}\t{card.Boosts}";
-            return line;
-        });
-
-        return await File.WriteAllLinesAsync(ALL_CARDS_FILES, lines).Try();
-    }
-
-    private static void ClampDetails(ref string name, ref int pinCost, ref int value)
-    {
-        name = name[..12];
-        pinCost = Math.Clamp(pinCost, 1, 3);
-        value = Math.Clamp(value, 1, 6);
+        var filter = Builders<Card>.Filter.Eq(c => c.Id, card.Id);
+        var result = await collection.DeleteOneAsync(filter);
+        return result.DeletedCount == 1;
     }
 }

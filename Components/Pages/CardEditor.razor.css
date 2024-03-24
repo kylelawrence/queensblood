@@ -1,0 +1,104 @@
+.container {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 60% 40%;
+}
+
+.card-editor {
+    position: relative;
+}
+
+.pic-btn-container {
+    position: absolute;
+    top: -30px;
+    display: grid;
+    place-items: center;
+    width: 100%;
+}
+
+.card-editor ::deep .card {
+    height: 400px;
+}
+
+.pin-cost-edit {
+    position: absolute;
+    top: -30px;
+    left: 0;
+}
+
+.value-edit {
+    position: absolute;
+    top: -30px;
+    right: 0;
+}
+
+.delete-btn {
+    position: absolute;
+    bottom: -60px;
+    left: 0;
+}
+
+.save-btn {
+    position: absolute;
+    bottom: -60px;
+    right: 0;
+}
+
+.name-input-container {
+    position: absolute;
+    bottom: -30px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.name-input-container ::deep input {
+    flex-grow: 1;
+    margin-left: 10px;
+}
+
+.all-cards {
+    flex-grow: 1;
+    border: solid 3px white;
+    border-radius: 10px;
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+}
+
+.all-cards ::deep .card {
+    height: 200px;
+    margin: 4px;
+    cursor: pointer;
+}
+
+.add-btn {
+    height: 200px;
+    aspect-ratio: 5/8;
+    border: solid 4px silver;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    margin: 4px;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.add-btn.selected {
+    border-color: red;
+}
+
+.add-btn div {
+    border: solid 4px green;
+    color: green;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 30px;
+    width: 50px;
+    height: 50px;
+}

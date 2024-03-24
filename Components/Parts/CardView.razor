@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card @(this.MaybeClass("selected", Selected))" @onclick="HandleClick">
     <div class="pin-cost">
         @for (var i = 0; i < CardModel.PinCost; i++)
         {
@@ -9,9 +9,14 @@
     <div class="field">
         @for (var i = 0; i < 25; i++)
         {
-            var middle = i == 12 ? "field-middle" : "";
-            var classList = $"{middle}";
-            <div class="@classList"></div>
+            var index = i;
+            var onClick = () => OnFieldClick(index);
+
+            var middle = index == 12 ? "field-middle" : "";
+            var boosted = CardModel.FieldIsBoosted(index) ? "field-boosted" : "";
+            var classList = $"{middle} {boosted}";
+
+            <div class="@classList" @onclick="onClick"></div>
         }
     </div>
     <div class="name">
@@ -33,6 +38,10 @@
         flex-direction: column;
         justify-content: flex-end;
         align-items: center;
+    }
+
+    .card.selected {
+        border-color: red;
     }
 
     .pin-cost {
@@ -59,13 +68,13 @@
         display: grid;
         place-items: center;
         aspect-ratio: 1;
-        height: 30px;
+        height: 38px;
         font-size: 20px;
     }
 
     .field {
         aspect-ratio: 1;
-        height: 32%;
+        height: 35%;
         margin-bottom: 8%;
         border: solid 2px silver;
         border-radius: 8px;
@@ -78,6 +87,10 @@
     .field>div {
         border-radius: 3px;
         background: #584839;
+    }
+
+    .field>div.field-boosted {
+        background: gold;
     }
 
     .field>div.field-middle {
@@ -94,8 +107,10 @@
 </style>
 
 @code {
-    [Parameter]
-    public Card CardModel { get; set; } = new Card(0, "Name", 1, 1, 1);
+    [Parameter] public bool Selected { get; set; }
+    [Parameter] public Card CardModel { get; set; } = CardHelper.Blank;
+    [Parameter] public Action<Card> OnClick { get; set; } = (Card card) => { };
+    [Parameter] public Action<int> OnFieldClick { get; set; } = (int index) => { };
 
-    public int Height { get; set; } = 400;
+    private void HandleClick() => OnClick(CardModel);
 }
