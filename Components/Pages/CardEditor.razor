@@ -1,122 +1,171 @@
 @page "/cards"
 @rendermode InteractiveServer
-@inject ICardsService cardsService
+@inject ICardsService cardsService;
 
 <div class="container">
-
-    <div class="all-cards">
-        @foreach (var card in cards)
-        {
-            <CardView Selected="@(card.Id == currentCard.Id)" CardModel="@card" OnClick="@ReplaceCard" />
-        }
-        <button type="button" @onclick="HandleAddButtonClick" title="Add card"
-            class="add-btn @(this.MaybeClass("selected", workingOnNew))">
-            <div>+</div>
-        </button>
+    <div class="left">
+        <div class="cardset">
+            <label>
+                Card set:
+                <InputSelect @bind-Value="selectedCardSet">
+                    @foreach (var set in cardSets)
+                    {
+                        <option>@set</option>
+                    }
+                </InputSelect>
+            </label>
+            <button class="refresh">&#8635;</button>
+            <button class="save">Save new iteration</button>
+        </div>
+        <div class="cards">
+            <CardView CardModel="@(new Card("Derp", 1, 1, 0))" />
+            <button class="new">
+                <div>+</div>
+            </button>
+        </div>
     </div>
-    <div class="middle">
-        <div class="card-editor">
-            @if (currentCard.Value == 0)
-            {
-                <div>Choose a card to edit</div>
-            }
-            else
-            {
-                <CardView CardModel="@currentCard" OnFieldClick="@HandleFieldClick" />
-                <div class="pic-btn-container">
-                    <input type="button" value="edit picture" />
-                </div>
-                <div class="pin-cost-edit">
-                    <input type="button" title="reduce cost" value="-" @onclick="HandleCostDecrease" />
-                    <input type="button" title="increase cost" value="+" @onclick="HandleCostIncrease" />
-                </div>
-                <div class="value-edit">
-                    <input type="button" title="reduce value" value="-" @onclick="HandleValueDecrease" />
-                    <input type="button" title="increase value" value="+" @onclick="HandleValueIncrease" />
-                </div>
-                @if (!workingOnNew)
-                {
-                    <input type="button" value="Delete card" class="delete-btn" @onclick="HandleDeleteClick" />
-                }
-                <input type="button" value="Save card" class="save-btn" @onclick="HandleSaveClick" />
-
-                <div class="name-input-container">
-                    <span>Name:</span>
-                    <InputText @bind-Value="CurrentCardName" maxlength="@CardHelper.MAX_NAME_LENGTH" />
-                </div>
-            }
+    <div class="right">
+        <div class="editor">
+            <div class="separate">
+                <div><input type="button" value="-" /><input type="button" value="+" /></div>
+                <input type="button" value="change image" />
+                <div><input type="button" value="-" /><input type="button" value="+" /></div>
+            </div>
+            <div class="grow">
+                <CardView CardModel="@(new Card("Derp", 1, 1, 0))" />
+            </div>
+            <div class="separate">
+                <span>Name</span>
+                <InputText class="grow" @bind-Value="currentName" />
+            </div>
         </div>
     </div>
 </div>
 
-@code {
-    private Card currentCard = CardHelper.Null;
-
-    private bool workingOnNew;
-
-    private string CurrentCardName
-    {
-        get => currentCard.Name;
-        set => UpdateCard(name: value);
+<style>
+    .container {
+        flex-grow: 1;
+        display: grid;
+        grid-template-columns: 60% 40%;
     }
 
-    private ReadOnlyCollection<Card> cards = new(new List<Card>());
+    .left {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cardset {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        border: solid 3px silver;
+        border-radius: 15px;
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .cardset select {
+        width: 300px;
+        flex-grow: 1;
+        height: 30px;
+    }
+
+    .cardset button {
+        height: 30px;
+        min-width: 30px;
+    }
+
+    .cardset>.save {
+        margin-left: auto;
+    }
+
+    .cards {
+        border: solid 3px silver;
+        border-radius: 15px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .new {
+        background: transparent;
+        min-height: 200px;
+        aspect-ratio: 5/8;
+        border: solid 4px silver;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+    }
+
+    .new>div {
+        border: solid 4px green;
+        color: green;
+        border-radius: 50%;
+        height: 50px;
+        aspect-ratio: 1;
+        font-size: 20px;
+        display: grid;
+        place-items: center;
+    }
+
+    .right {
+        display: grid;
+        place-items: center;
+    }
+
+    .editor {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .editor>div {
+        display: flex;
+    }
+
+    .separate {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .grow {
+        flex-grow: 1;
+    }
+
+    .grow .card {
+        height: 400px;
+    }
+</style>
+
+@code {
+    private string currentName
+    {
+        get => currentCard.Name;
+        set
+        {
+            currentCard = new(value, currentCard.PinCost, currentCard.Value, currentCard.Boosts);
+            StateHasChanged();
+        }
+    }
+
+    private Card currentCard = Card.Null;
+
+    private ReadOnlyCollection<CardSet> cardSets = new List<CardSet>().AsReadOnly();
+    private CardSet selectedCardSet = CardSet.Empty;
 
     protected override void OnInitialized()
     {
-        cards = cardsService.GetAllCards();
-    }
-
-    private void HandleAddButtonClick()
-    {
-        workingOnNew = true;
-        currentCard = CardHelper.Blank;
-        StateHasChanged();
-    }
-
-    private async void HandleSaveClick()
-    {
-        var result = await cardsService.UpsertCard(currentCard, workingOnNew);
-        currentCard = result.Card;
-        workingOnNew = false;
-        RefreshCards();
-    }
-
-    private async void HandleDeleteClick()
-    {
-        if (workingOnNew) return;
-
-        var result = await cardsService.DeleteCard(currentCard);
-        currentCard = CardHelper.Null;
-        RefreshCards();
-    }
-
-    private void RefreshCards()
-    {
-        cards = cardsService.GetAllCards();
-        StateHasChanged();
-    }
-
-    private void HandleCostDecrease() => UpdateCard(pinCost: currentCard.PinCost - 1);
-    private void HandleCostIncrease() => UpdateCard(pinCost: currentCard.PinCost + 1);
-    private void HandleValueDecrease() => UpdateCard(value: currentCard.Value - 1);
-    private void HandleValueIncrease() => UpdateCard(value: currentCard.Value + 1);
-
-    private void HandleFieldClick(int index)
-    {
-        currentCard = currentCard.ToggleBoost(index);
-        StateHasChanged();
-    }
-
-    private void ReplaceCard(Card card)
-    {
-        workingOnNew = false;
-        currentCard = card;
-        StateHasChanged();
-    }
-    private void UpdateCard(string name = "", int pinCost = 0, int value = 0)
-    {
-        CardHelper.Change(ref currentCard, name, pinCost, value);
+        var allSets = cardsService.GetCardSets();
+        if (allSets.Count != 0) selectedCardSet = allSets[0];
+        else cardSets = new List<CardSet>([CardSet.Empty]).AsReadOnly();
         StateHasChanged();
     }
 }

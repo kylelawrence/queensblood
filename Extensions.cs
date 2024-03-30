@@ -46,12 +46,6 @@ public static class Extensions
     {
         if (index < 0 || index > 24 || index == 12) return card;
         var newBoosts = card.Boosts ^ fieldValues[index];
-        return new(
-            card.Id,
-            card.Name,
-            card.PinCost,
-            card.Value,
-            newBoosts
-        );
+        return new(card.Name, card.PinCost, card.Value, newBoosts);
     }
 }

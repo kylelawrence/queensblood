@@ -1,55 +1,84 @@
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using MongoDB.Bson;
+using System.Linq.Expressions;
 using MongoDB.Driver;
 
 namespace queensblood;
 
-public record Card(ObjectId Id, string Name, int PinCost, int Value, int Boosts);
+public record CardSet(int Iteration, DateTime Created, Card[] Cards, string Note)
+{
+    public static readonly CardSet Empty = new(0, DateTime.Now, [], "Initial");
+
+    public override string ToString()
+    {
+        return $"{Created} - {Note}";
+    }
+}
+
+public record Card(string Name, int PinCost, int Value, int Boosts)
+{
+    public static readonly Card Null = new("", 0, 0, 0);
+    public static readonly Card New = new("Name", 1, 1, 0);
+
+    public override string ToString()
+    {
+        return $"\"{Name}\",{PinCost},{Value},{Boosts}";
+    }
+}
 
 public interface ICardsService
 {
-    public ReadOnlyCollection<Card> GetAllCards();
-    public Task<ChangeResult> UpsertCard(Card card, bool isNew);
-    public Task<bool> DeleteCard(Card card);
+    public ReadOnlyCollection<CardSet> GetCardSets();
+    public int AddCard(Card card);
+    public void UpdateCard(int index, Card card);
+    public void DeleteCard(int index);
+    public Task<bool> SaveLatestSet(string note);
+    public CardSet GetLatestCardSet();
 }
-
-public record ChangeResult(Card Card, bool Success);
 
 public class CardsMongoService : ICardsService
 {
-    private static readonly ReplaceOptions replaceOptions = new() { IsUpsert = true };
+    private readonly List<Card> cards = [];
     private readonly IMongoDatabase db;
-    private readonly IMongoCollection<Card> collection;
+    private readonly IMongoCollection<CardSet> cardSets;
 
     public CardsMongoService(IMongoDatabase database)
     {
         db = database;
-        collection = db.GetCollection<Card>("cards");
+        cardSets = db.GetCollection<CardSet>("cardsets");
     }
 
-    public ReadOnlyCollection<Card> GetAllCards()
+    public int AddCard(Card card)
     {
-        return collection.AsQueryable().ToList().AsReadOnly();
+        cards.Add(card);
+        return cards.Count;
     }
 
-    public async Task<ChangeResult> UpsertCard(Card card, bool isNew)
+    public void DeleteCard(int index)
     {
-        // Clamp the values, just in case
-        CardHelper.Change(ref card, pinCost: 0);
+        if (index < 0 || index >= cards.Count) return;
 
-        var builder = Builders<Card>.Filter;
-        var filter = isNew ? builder.Eq(c => c.Value, 0) : builder.Eq(c => c.Id, card.Id);
-        var result = await collection.ReplaceOneAsync(filter, card, replaceOptions);
-        var newId = result.UpsertedId != null ? result.UpsertedId.AsObjectId : card.Id;
-        var updated = new Card(newId, card.Name, card.PinCost, card.Value, card.Boosts);
-        return new(updated, true);
+        cards.RemoveAt(index);
     }
 
-    public async Task<bool> DeleteCard(Card card)
+    public ReadOnlyCollection<CardSet> GetCardSets()
     {
-        var filter = Builders<Card>.Filter.Eq(c => c.Id, card.Id);
-        var result = await collection.DeleteOneAsync(filter);
-        return result.DeletedCount == 1;
+        return cardSets.AsQueryable().OrderByDescending(cs => cs.Iteration).ToList().AsReadOnly();
+    }
+
+    public CardSet GetLatestCardSet()
+    {
+        return cardSets.AsQueryable().MaxBy(cs => cs.Iteration) ?? new(0, DateTime.Now, [], "Initial");
+    }
+
+    public async Task<bool> SaveLatestSet(string note)
+    {
+        var iteration = cardSets.AsQueryable().Any() ? cardSets.AsQueryable().Max(cs => cs.Iteration) + 1 : 1;
+        var task = cardSets.InsertOneAsync(new(iteration, DateTime.Now, [.. cards], note));
+        return await task.Try();
+    }
+
+    public void UpdateCard(int index, Card card)
+    {
+        cards[index] = card;
     }
 }
