@@ -1,12 +1,12 @@
 using System.Collections.ObjectModel;
-using System.Linq.Expressions;
 using MongoDB.Driver;
+using Rock = System.Collections.ObjectModel.ReadOnlyCollection<queensblood.Card>;
 
 namespace queensblood;
 
-public record CardSet(int Iteration, DateTime Created, Card[] Cards, string Note)
+public record CardSet(int Iteration, DateTime Created, Rock Cards, string Note)
 {
-    public static readonly CardSet Empty = new(0, DateTime.Now, [], "Initial");
+    public static readonly CardSet Empty = new(0, DateTime.Now, new Rock([]), "Initial");
 
     public override string ToString()
     {
@@ -28,16 +28,12 @@ public record Card(string Name, int PinCost, int Value, int Boosts)
 public interface ICardsService
 {
     public ReadOnlyCollection<CardSet> GetCardSets();
-    public int AddCard(Card card);
-    public void UpdateCard(int index, Card card);
-    public void DeleteCard(int index);
-    public Task<bool> SaveLatestSet(string note);
+    public Task<bool> SaveSet(string note, IList<Card> cards);
     public CardSet GetLatestCardSet();
 }
 
 public class CardsMongoService : ICardsService
 {
-    private readonly List<Card> cards = [];
     private readonly IMongoDatabase db;
     private readonly IMongoCollection<CardSet> cardSets;
 
@@ -47,38 +43,25 @@ public class CardsMongoService : ICardsService
         cardSets = db.GetCollection<CardSet>("cardsets");
     }
 
-    public int AddCard(Card card)
-    {
-        cards.Add(card);
-        return cards.Count;
-    }
-
-    public void DeleteCard(int index)
-    {
-        if (index < 0 || index >= cards.Count) return;
-
-        cards.RemoveAt(index);
-    }
-
     public ReadOnlyCollection<CardSet> GetCardSets()
     {
-        return cardSets.AsQueryable().OrderByDescending(cs => cs.Iteration).ToList().AsReadOnly();
+        var list = cardSets.AsQueryable().OrderByDescending(cs => cs.Iteration).ToList();
+        if (list.Count == 0)
+        {
+            list.Add(CardSet.Empty);
+        }
+        return list.AsReadOnly();
     }
 
     public CardSet GetLatestCardSet()
     {
-        return cardSets.AsQueryable().MaxBy(cs => cs.Iteration) ?? new(0, DateTime.Now, [], "Initial");
+        return cardSets.AsQueryable().MaxBy(cs => cs.Iteration) ?? CardSet.Empty;
     }
 
-    public async Task<bool> SaveLatestSet(string note)
+    public async Task<bool> SaveSet(string note, IList<Card> cards)
     {
         var iteration = cardSets.AsQueryable().Any() ? cardSets.AsQueryable().Max(cs => cs.Iteration) + 1 : 1;
-        var task = cardSets.InsertOneAsync(new(iteration, DateTime.Now, [.. cards], note));
+        var task = cardSets.InsertOneAsync(new(iteration, DateTime.Now, new Rock(cards), note));
         return await task.Try();
-    }
-
-    public void UpdateCard(int index, Card card)
-    {
-        cards[index] = card;
     }
 }

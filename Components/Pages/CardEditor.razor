@@ -3,169 +3,131 @@
 @inject ICardsService cardsService;
 
 <div class="container">
-    <div class="left">
-        <div class="cardset">
-            <label>
-                Card set:
-                <InputSelect @bind-Value="selectedCardSet">
-                    @foreach (var set in cardSets)
-                    {
-                        <option>@set</option>
-                    }
-                </InputSelect>
-            </label>
-            <button class="refresh">&#8635;</button>
-            <button class="save">Save new iteration</button>
-        </div>
-        <div class="cards">
-            <CardView CardModel="@(new Card("Derp", 1, 1, 0))" />
-            <button class="new">
-                <div>+</div>
-            </button>
-        </div>
-    </div>
-    <div class="right">
-        <div class="editor">
-            <div class="separate">
-                <div><input type="button" value="-" /><input type="button" value="+" /></div>
-                <input type="button" value="change image" />
-                <div><input type="button" value="-" /><input type="button" value="+" /></div>
-            </div>
-            <div class="grow">
-                <CardView CardModel="@(new Card("Derp", 1, 1, 0))" />
-            </div>
-            <div class="separate">
-                <span>Name</span>
-                <InputText class="grow" @bind-Value="currentName" />
-            </div>
-        </div>
-    </div>
+	<div class="left">
+		<div class="cardset">
+			<label>
+				Card set:
+				<InputSelect @bind-Value="selectedCardSet">
+					@foreach (var set in cardSets)
+					{
+						<option>@set</option>
+					}
+				</InputSelect>
+			</label>
+			<button class="refresh" @onclick="OnInitialized">&#8635;</button>
+			<button class="save" @onclick="HandleSaveIterationClick">Save new iteration</button>
+		</div>
+		<div class="cards">
+			@foreach (var card in selectedCardSet.Cards)
+			{
+				var selected = currentCard == card;
+				<CardView CardModel="@card" OnClick="HandleCardClick" Selected="@selected" />
+			}
+			<button class="new @(this.MaybeClass("selected", currentCardIndex == NEW_INDEX))" @onclick="HandleNewClick">
+				<div>+</div>
+			</button>
+		</div>
+	</div>
+	<div class="right">
+		@if (currentCardIndex == NULL_INDEX)
+		{
+			<div style="text-align: center">
+				Choose a card to edit
+				<br />
+				or
+				<br />
+				create a new one
+			</div>
+		}
+		else
+		{
+			<div class="editor">
+				<div class="separate">
+					<div>
+						<input type="button" value="-" @onclick="HandlePinCostDecrease" />
+						<input type="button" value="+" @onclick="HandlePinCostIncrease" />
+					</div>
+					<input type="button" value="change image" />
+					<div>
+						<input type="button" value="-" @onclick="HandleValueDecrease" />
+						<input type="button" value="+" @onclick="HandleValueIncrease" />
+					</div>
+				</div>
+				<div class="grow">
+					<CardView CardModel="@currentCard" />
+				</div>
+				<div class="separate">
+					<span>Name</span>
+					<InputText class="grow" @bind-Value="currentName" />
+				</div>
+				<div class="separate">
+					<div></div>
+					<input type="button" value="Save" @onclick="HandleSaveCardClick" />
+				</div>
+			</div>
+		}
+	</div>
 </div>
 
-<style>
-    .container {
-        flex-grow: 1;
-        display: grid;
-        grid-template-columns: 60% 40%;
-    }
-
-    .left {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .cardset {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        border: solid 3px silver;
-        border-radius: 15px;
-        padding: 10px;
-        gap: 10px;
-    }
-
-    .cardset select {
-        width: 300px;
-        flex-grow: 1;
-        height: 30px;
-    }
-
-    .cardset button {
-        height: 30px;
-        min-width: 30px;
-    }
-
-    .cardset>.save {
-        margin-left: auto;
-    }
-
-    .cards {
-        border: solid 3px silver;
-        border-radius: 15px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 10px;
-    }
-
-    .new {
-        background: transparent;
-        min-height: 200px;
-        aspect-ratio: 5/8;
-        border: solid 4px silver;
-        border-radius: 10px;
-        display: grid;
-        place-items: center;
-        cursor: pointer;
-    }
-
-    .new>div {
-        border: solid 4px green;
-        color: green;
-        border-radius: 50%;
-        height: 50px;
-        aspect-ratio: 1;
-        font-size: 20px;
-        display: grid;
-        place-items: center;
-    }
-
-    .right {
-        display: grid;
-        place-items: center;
-    }
-
-    .editor {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-    }
-
-    .editor>div {
-        display: flex;
-    }
-
-    .separate {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .grow {
-        flex-grow: 1;
-    }
-
-    .grow .card {
-        height: 400px;
-    }
-</style>
-
 @code {
-    private string currentName
-    {
-        get => currentCard.Name;
-        set
-        {
-            currentCard = new(value, currentCard.PinCost, currentCard.Value, currentCard.Boosts);
-            StateHasChanged();
-        }
-    }
+	private const int NULL_INDEX = -2;
+	private const int NEW_INDEX = -1;
 
-    private Card currentCard = Card.Null;
+	private string currentName
+	{
+		get => currentCard.Name;
+		set
+		{
+			UpdateCard(value);
+			StateHasChanged();
+		}
+	}
 
-    private ReadOnlyCollection<CardSet> cardSets = new List<CardSet>().AsReadOnly();
-    private CardSet selectedCardSet = CardSet.Empty;
+	private Card currentCard = Card.Null;
 
-    protected override void OnInitialized()
-    {
-        var allSets = cardsService.GetCardSets();
-        if (allSets.Count != 0) selectedCardSet = allSets[0];
-        else cardSets = new List<CardSet>([CardSet.Empty]).AsReadOnly();
-        StateHasChanged();
-    }
+	private int currentCardIndex = NULL_INDEX;
+
+	private ReadOnlyCollection<CardSet> cardSets = new List<CardSet>().AsReadOnly();
+	private CardSet selectedCardSet = CardSet.Empty;
+
+	protected override void OnInitialized()
+	{
+		cardSets = cardsService.GetCardSets();
+		selectedCardSet = cardSets[0];
+		StateHasChanged();
+	}
+
+	private void HandleNewClick()
+	{
+		currentCard = Card.New;
+		currentCardIndex = NEW_INDEX;
+		StateHasChanged();
+	}
+
+	private void HandleCardClick(Card card)
+	{
+		currentCard = card;
+		StateHasChanged();
+	}
+
+	private async Task HandleSaveIterationClick(MouseEventArgs e)
+	{
+		await Task.FromResult(true);
+	}
+
+	private void HandlePinCostDecrease() => UpdateCard(pinCost: currentCard.PinCost - 1);
+	private void HandlePinCostIncrease() => UpdateCard(pinCost: currentCard.PinCost + 1);
+	private void HandleValueDecrease() => UpdateCard(value: currentCard.Value - 1);
+	private void HandleValueIncrease() => UpdateCard(value: currentCard.Value + 1);
+
+	private void UpdateCard(string name = "", int pinCost = 0, int value = 0)
+	{
+		CardHelper.Change(ref currentCard, name, pinCost, value);
+		StateHasChanged();
+	}
+
+	private void HandleSaveCardClick()
+	{
+		StateHasChanged();
+	}
 }

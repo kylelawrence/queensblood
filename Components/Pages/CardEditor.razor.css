@@ -1,0 +1,104 @@
+﻿.container {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: 60% 40%;
+}
+
+.left {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cardset {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    border: solid 3px silver;
+    border-radius: 15px;
+    padding: 10px;
+    gap: 10px;
+}
+
+.cardset ::deep select {
+    width: 300px;
+    flex-grow: 1;
+    height: 30px;
+}
+
+.cardset button {
+    height: 30px;
+    min-width: 30px;
+}
+
+.cardset > .save {
+    margin-left: auto;
+}
+
+.cards {
+    border: solid 3px silver;
+    border-radius: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px;
+}
+
+.new {
+    background: transparent;
+    min-height: 200px;
+    aspect-ratio: 5/8;
+    border: solid 4px silver;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.new.selected {
+    border-color: red;
+}
+
+.new > div {
+    border: solid 4px green;
+    color: green;
+    border-radius: 50%;
+    height: 50px;
+    aspect-ratio: 1;
+    font-size: 20px;
+    display: grid;
+    place-items: center;
+}
+
+.right {
+    display: grid;
+    place-items: center;
+}
+
+.editor {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.editor > div {
+    display: flex;
+}
+
+.separate {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.grow {
+    flex-grow: 1;
+}
+
+.grow ::deep .card {
+    height: 400px;
+}
