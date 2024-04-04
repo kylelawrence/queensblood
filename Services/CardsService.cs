@@ -1,12 +1,39 @@
 using System.Collections.ObjectModel;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Driver;
 using Rock = System.Collections.ObjectModel.ReadOnlyCollection<queensblood.Card>;
 
 namespace queensblood;
 
-public record CardSet(int Iteration, DateTime Created, Rock Cards, string Note)
+public class CardSet
 {
-    public static readonly CardSet Empty = new(0, DateTime.Now, new Rock([]), "Initial");
+    public static readonly CardSet Empty = new(0, new Rock([]), "Initial");
+
+    [BsonId]
+    public ObjectId Id { get; } = ObjectId.GenerateNewId();
+    public int Iteration { get; }
+    public DateTime Created { get; }
+    public Rock Cards { get; }
+    public string Note { get; }
+
+    public CardSet(int iteration, Rock cards, string note)
+    {
+        Id = ObjectId.GenerateNewId();
+        Created = DateTime.Now;
+        Iteration = iteration;
+        Cards = cards;
+        Note = note;
+    }
+
+    public CardSet(ObjectId id, int iteration, DateTime created, Rock cards, string note)
+    {
+        Id = id;
+        Iteration = iteration;
+        Created = created;
+        Cards = cards;
+        Note = note;
+    }
 
     public override string ToString()
     {
@@ -61,7 +88,7 @@ public class CardsMongoService : ICardsService
     public async Task<bool> SaveSet(string note, IList<Card> cards)
     {
         var iteration = cardSets.AsQueryable().Any() ? cardSets.AsQueryable().Max(cs => cs.Iteration) + 1 : 1;
-        var task = cardSets.InsertOneAsync(new(iteration, DateTime.Now, new Rock(cards), note));
+        var task = cardSets.InsertOneAsync(new(iteration, new Rock(cards), note));
         return await task.Try();
     }
 }

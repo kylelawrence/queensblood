@@ -1,133 +1,183 @@
 @page "/cards"
 @rendermode InteractiveServer
 @inject ICardsService cardsService;
+@inject IJSRuntime js;
 
 <div class="container">
-	<div class="left">
-		<div class="cardset">
-			<label>
-				Card set:
-				<InputSelect @bind-Value="selectedCardSet">
-					@foreach (var set in cardSets)
-					{
-						<option>@set</option>
-					}
-				</InputSelect>
-			</label>
-			<button class="refresh" @onclick="OnInitialized">&#8635;</button>
-			<button class="save" @onclick="HandleSaveIterationClick">Save new iteration</button>
-		</div>
-		<div class="cards">
-			@foreach (var card in selectedCardSet.Cards)
-			{
-				var selected = currentCard == card;
-				<CardView CardModel="@card" OnClick="HandleCardClick" Selected="@selected" />
-			}
-			<button class="new @(this.MaybeClass("selected", currentCardIndex == NEW_INDEX))" @onclick="HandleNewClick">
-				<div>+</div>
-			</button>
-		</div>
-	</div>
-	<div class="right">
-		@if (currentCardIndex == NULL_INDEX)
-		{
-			<div style="text-align: center">
-				Choose a card to edit
-				<br />
-				or
-				<br />
-				create a new one
-			</div>
-		}
-		else
-		{
-			<div class="editor">
-				<div class="separate">
-					<div>
-						<input type="button" value="-" @onclick="HandlePinCostDecrease" />
-						<input type="button" value="+" @onclick="HandlePinCostIncrease" />
-					</div>
-					<input type="button" value="change image" />
-					<div>
-						<input type="button" value="-" @onclick="HandleValueDecrease" />
-						<input type="button" value="+" @onclick="HandleValueIncrease" />
-					</div>
-				</div>
-				<div class="grow">
-					<CardView CardModel="@currentCard" />
-				</div>
-				<div class="separate">
-					<span>Name</span>
-					<InputText class="grow" @bind-Value="currentName" />
-				</div>
-				<div class="separate">
-					<div></div>
-					<input type="button" value="Save" @onclick="HandleSaveCardClick" />
-				</div>
-			</div>
-		}
-	</div>
+    <div class="left">
+        <div class="cardset">
+            <label>
+                Card set:
+                <InputSelect @bind-Value="SelectedCardSetIndex">
+                    @for (var i = 0; i < cardSets.Count(); i++)
+                    {
+                        <option value="@i">@cardSets[i]</option>
+                    }
+                </InputSelect>
+            </label>
+            <button type="button" class="refresh" @onclick="OnInitialized">&#8635;</button>
+            <button type="button" class="save" @onclick="HandleSaveIterationClick">Save new iteration</button>
+        </div>
+        <div class="cards">
+            @for (var i = 0; i < cards.Count; i++)
+            {
+                var index = i;
+                var click = (Card _) =>
+                {
+                    currentCardIndex = index;
+                    StateHasChanged();
+                };
+                <CardView CardModel="@cards[index]" OnClick="@click" Selected="@(currentCardIndex == index)" />
+            }
+            <button class="new" type="button" @onclick="HandleNewCardClick">
+                <div>+</div>
+            </button>
+        </div>
+    </div>
+    <div class="right">
+        @if (currentCardIndex == NULL_INDEX)
+        {
+            <div style="text-align: center">
+                Choose a card to edit
+                <br />
+                or
+                <br />
+                create a new one
+            </div>
+        }
+        else
+        {
+            <div class="editor">
+                <div class="separate">
+                    <div>
+                        <input type="button" value="-" @onclick="HandlePinCostDecrease" />
+                        <input type="button" value="+" @onclick="HandlePinCostIncrease" />
+                    </div>
+                    <input type="button" value="change image" />
+                    <div>
+                        <input type="button" value="-" @onclick="HandleValueDecrease" />
+                        <input type="button" value="+" @onclick="HandleValueIncrease" />
+                    </div>
+                </div>
+                <div class="grow">
+                    <CardView CardModel="@CurrentCard" OnFieldClick="HandleFieldClick" />
+                </div>
+                <div class="separate">
+                    <span>Name</span>
+                    <InputText class="grow" @bind-Value="CurrentName" />
+                </div>
+                <div class="separate">
+                    <input type="button" value="Delete" @onclick="HandleDeleteCardClick" />
+                </div>
+            </div>
+        }
+    </div>
 </div>
 
+<dialog class="savedialog">
+    <EditForm Model="saveNote" OnSubmit="HandleConfirmSaveSubmit">
+        <label>
+            <h3>Write a note</h3>
+            <InputText @bind-Value="saveNote" autofocus />
+        </label>
+        <div class="savebuttons">
+            <input type="button" value="cancel" />
+            <input type="submit" value="save" disabled="@(string.IsNullOrWhiteSpace(saveNote))" />
+        </div>
+    </EditForm>
+</dialog>
+
+<script>
+    function showDialog() {
+        document.querySelector('.savedialog')?.showModal();
+    }
+
+    function closeDialog() {
+        document.querySelector('.savedialog')?.close();
+    }
+</script>
+
 @code {
-	private const int NULL_INDEX = -2;
-	private const int NEW_INDEX = -1;
+    private const int NULL_INDEX = -1;
 
-	private string currentName
-	{
-		get => currentCard.Name;
-		set
-		{
-			UpdateCard(value);
-			StateHasChanged();
-		}
-	}
+    private string CurrentName
+    {
+        get => CurrentCard.Name;
+        set
+        {
+            UpdateCard(value);
+        }
+    }
+    private ReadOnlyCollection<CardSet> cardSets = new([]);
+    private int selectedCardSetIndex = NULL_INDEX;
+    private int SelectedCardSetIndex
+    {
+        get => selectedCardSetIndex;
+        set
+        {
+            selectedCardSetIndex = value;
+            cards = new(cardSets[selectedCardSetIndex].Cards);
+            StateHasChanged();
+        }
+    }
+    private List<Card> cards = [];
+    private int currentCardIndex = NULL_INDEX;
+    private Card CurrentCard { get => cards[currentCardIndex]; }
+    private bool isSaveDialogOpen = false;
+    private string saveNote = "";
 
-	private Card currentCard = Card.Null;
+    protected override void OnInitialized()
+    {
+        cardSets = cardsService.GetCardSets();
+        SelectedCardSetIndex = 0;
+    }
 
-	private int currentCardIndex = NULL_INDEX;
+    private void UpdateCard(string name = "", int pinCost = 0, int value = 0)
+    {
+        var card = CardHelper.Change(cards[currentCardIndex], name, pinCost, value);
+        cards[currentCardIndex] = card;
+        StateHasChanged();
+    }
 
-	private ReadOnlyCollection<CardSet> cardSets = new List<CardSet>().AsReadOnly();
-	private CardSet selectedCardSet = CardSet.Empty;
+    private async void HandleSaveIterationClick()
+    {
+        await js.InvokeVoidAsync("showDialog");
+        StateHasChanged();
+    }
 
-	protected override void OnInitialized()
-	{
-		cardSets = cardsService.GetCardSets();
-		selectedCardSet = cardSets[0];
-		StateHasChanged();
-	}
+    private void HandleNewCardClick()
+    {
+        cards.Add(new($"Card #{cards.Count + 1}", 1, 1, 0));
+        currentCardIndex = cards.Count - 1;
+        StateHasChanged();
+    }
 
-	private void HandleNewClick()
-	{
-		currentCard = Card.New;
-		currentCardIndex = NEW_INDEX;
-		StateHasChanged();
-	}
+    private void HandlePinCostDecrease() => UpdateCard(pinCost: CurrentCard.PinCost - 1);
+    private void HandlePinCostIncrease() => UpdateCard(pinCost: CurrentCard.PinCost + 1);
+    private void HandleValueDecrease() => UpdateCard(value: CurrentCard.Value - 1);
+    private void HandleValueIncrease() => UpdateCard(value: CurrentCard.Value + 1);
 
-	private void HandleCardClick(Card card)
-	{
-		currentCard = card;
-		StateHasChanged();
-	}
+    private void HandleDeleteCardClick()
+    {
+        cards.RemoveAt(currentCardIndex);
+        currentCardIndex = NULL_INDEX;
+        StateHasChanged();
+    }
+    
+    private async Task HandleConfirmSaveSubmit()
+    {
+        var result = await cardsService.SaveSet(saveNote, cards);
+        Console.WriteLine("Save: ", result);
+        if (result)
+        {
+            await js.InvokeVoidAsync("closeDialog");
+            StateHasChanged();
+        }
+    }
 
-	private async Task HandleSaveIterationClick(MouseEventArgs e)
-	{
-		await Task.FromResult(true);
-	}
-
-	private void HandlePinCostDecrease() => UpdateCard(pinCost: currentCard.PinCost - 1);
-	private void HandlePinCostIncrease() => UpdateCard(pinCost: currentCard.PinCost + 1);
-	private void HandleValueDecrease() => UpdateCard(value: currentCard.Value - 1);
-	private void HandleValueIncrease() => UpdateCard(value: currentCard.Value + 1);
-
-	private void UpdateCard(string name = "", int pinCost = 0, int value = 0)
-	{
-		CardHelper.Change(ref currentCard, name, pinCost, value);
-		StateHasChanged();
-	}
-
-	private void HandleSaveCardClick()
-	{
-		StateHasChanged();
-	}
+    private void HandleFieldClick(int index)
+    {
+        cards[currentCardIndex] = cards[currentCardIndex].ToggleBoost(index);
+        StateHasChanged();
+    }
 }

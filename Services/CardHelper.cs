@@ -13,10 +13,10 @@ public static class CardHelper
     public static Card Blank { get => new("Name", 1, 1, 0); }
     public static readonly Card Null = new("", 0, 0, 0);
 
-    public static void Change(ref Card card, string name = "", int pinCost = 0, int value = 0)
+    public static Card Change(Card card, string name = "", int pinCost = 0, int value = 0)
     {
         name = name.Length > MAX_NAME_LENGTH ? name[..MAX_NAME_LENGTH] : name;
-        card = new(
+        return new(
             name == "" ? card.Name : name,
             pinCost == 0 ? card.PinCost : Math.Clamp(pinCost, 1, MAX_PIN_COST),
             value == 0 ? card.Value : Math.Clamp(value, 1, MAX_VALUE),
