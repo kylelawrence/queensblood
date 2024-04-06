@@ -82,7 +82,11 @@ public class CardsMongoService : ICardsService
 
     public CardSet GetLatestCardSet()
     {
-        return cardSets.AsQueryable().MaxBy(cs => cs.Iteration) ?? CardSet.Empty;
+        return cardSets
+            .Find(x => true)
+            .SortByDescending(cs => cs.Iteration)
+            .Limit(1)
+            .First() ?? CardSet.Empty;
     }
 
     public async Task<bool> SaveSet(string note, IList<Card> cards)

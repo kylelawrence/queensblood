@@ -1,13 +1,17 @@
 @page "/decks"
+@rendermode InteractiveServer
+@inject ICardsService cardsService
+@inject IJSRuntime JS
 
 <PageTitle>Queen's Blood - Manage Decks</PageTitle>
 
 <div class="decks-container">
     <div class="decks-header">
         <span>Your decks</span>
-        @for (var i = 1; i <= 5; i++)
+        @for (var i = 1; i <= 5; i += 1)
         {
-            <DeckSelectButton Index="i" />
+            var index = i;
+            <button type="button" class="deck-select-button" @onclick="() => HandleDeckClick(index)">@i</button>
         }
         <label>
             <span>Deck nickname:</span>
@@ -15,21 +19,77 @@
         </label>
     </div>
 
-    <ActiveDeck />
+    <div class="active-deck">
+        @foreach (var pair in currentDeck)
+        {
+            var card = cardSet.Cards[pair.Key];
+            <div class="card-holder">
+                <CardView CardModel="@card" OnClick="(Card _) => HandleRemoveCardClick(pair.Key)" />
+                <div>@pair.Value/2</div>
+            </div>
+        }
+    </div>
+
+    <div class="all-cards">
+        @for (var i = 0; i < cardSet.Cards.Count; i++)
+        {
+            var index = i;
+            var card = cardSet.Cards[i];
+            var usedCount = 0;
+            currentDeck.TryGetValue(index, out usedCount);
+            var count = 2 - usedCount;
+            <div class="card-holder">
+                <CardView CardModel="@card" OnClick="(Card _) => HandleAddCardClick(index)" />
+                <div>@count/2</div>
+            </div>
+        }
+    </div>
 </div>
 
-<style>
-    .decks-container {
-        display: flex;
-        flex-grow: 1;
-        flex-direction: column;
+@code {
+    private SortedList<int, int> currentDeck = [];
+    private CardSet cardSet = CardSet.Empty;
+
+    protected override void OnInitialized()
+    {
+        cardSet = cardsService.GetLatestCardSet();
     }
 
-    .deck-name-input {
-        background: transparent;
-        color: white;
-        border: solid 2px white;
-        border-radius: 5px;
-        padding: 4px;
+    private async Task HandleDeckClick(int index)
+    {
     }
-</style>
+
+    private void HandleAddCardClick(int index)
+    {
+        int count = 0;
+        if (currentDeck.TryGetValue(index, out count))
+        {
+            if (count < 2)
+            {
+                currentDeck[index] = 2;
+            }
+        }
+        else
+        {
+            currentDeck.Add(index, 1);
+        }
+        StateHasChanged();
+    }
+
+    private void HandleRemoveCardClick(int index)
+    {
+        int count = 0;
+        if (currentDeck.TryGetValue(index, out count))
+        {
+            if (count >= 2)
+            {
+                currentDeck[index] = 1;
+            }
+            else
+            {
+                currentDeck.Remove(index);
+            }
+        }
+        StateHasChanged();
+    }
+}

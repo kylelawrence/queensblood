@@ -14,7 +14,13 @@ var cardsService = new CardsMongoService(db);
 
 // Add services to the container.
 builder.Services
+    .AddHttpContextAccessor()
     .AddSingleton<ICardsService>(cardsService)
+    .AddSingleton<IDecksService>((serviceProvider) =>
+    {
+        var contextProvider = serviceProvider.GetService<IHttpContextAccessor>();
+        return new DecksCookieService(contextProvider!);
+    })
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
