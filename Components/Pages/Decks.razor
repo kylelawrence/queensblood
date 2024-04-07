@@ -7,20 +7,25 @@
 
 <div class="decks-container">
     <div class="decks-header">
-        <span>Your decks</span>
-        @for (var i = 1; i <= 5; i += 1)
+        <span>Your decks:</span>
+        @for (var i = 0; i < 5; i += 1)
         {
             var index = i;
-            <button type="button" class="deck-select-button" @onclick="() => HandleDeckClick(index)">@i</button>
+            var label = i + 1;
+            <button type="button" class="deck-select-button @this.MaybeClass("selected", currentDeckIndex == index)"
+                @onclick="() => HandleDeckSelectClick(index)">
+                @label
+            </button>
         }
         <label>
             <span>Deck nickname:</span>
-            <input class="deck-name-input" type="text" />
+            <InputText class="deck-name-input" @bind-Value="currentDeckName" />
         </label>
+        <button type="button" class="save" @onclick="HandleSaveClick">Save deck</button>
     </div>
 
     <div class="active-deck">
-        @foreach (var pair in currentDeck)
+        @foreach (var pair in currentDeckCards)
         {
             var card = cardSet.Cards[pair.Key];
             <div class="card-holder">
@@ -36,7 +41,7 @@
             var index = i;
             var card = cardSet.Cards[i];
             var usedCount = 0;
-            currentDeck.TryGetValue(index, out usedCount);
+            currentDeckCards.TryGetValue(index, out usedCount);
             var count = 2 - usedCount;
             <div class="card-holder">
                 <CardView CardModel="@card" OnClick="(Card _) => HandleAddCardClick(index)" />
@@ -47,7 +52,9 @@
 </div>
 
 @code {
-    private SortedList<int, int> currentDeck = [];
+    private int currentDeckIndex = -1;
+    private string currentDeckName = "";
+    private SortedList<int, int> currentDeckCards = [];
     private CardSet cardSet = CardSet.Empty;
 
     protected override void OnInitialized()
@@ -55,23 +62,61 @@
         cardSet = cardsService.GetLatestCardSet();
     }
 
-    private async Task HandleDeckClick(int index)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        if (!firstRender) return;
+        int selectedDeck = 0;
+        var result = await JS.InvokeAsync<string>("getSelectedDeck");
+        int.TryParse(result, out selectedDeck);
+        await HandleDeckSelectClick(selectedDeck);
+    }
+
+    private async Task HandleDeckSelectClick(int index)
+    {
+        var deck = await JS.InvokeAsync<Deck>("loadDeck", index);
+        if (deck.name.Equals("!!ERROR!!")) return;
+
+        if (deck.iteration == -1)
+        {
+            currentDeckIndex = index;
+            currentDeckName = deck.name;
+            currentDeckCards = [];
+            StateHasChanged();
+            return;
+        }
+
+        var cards = new SortedList<int, int>();
+        foreach (var card in deck.cards)
+        {
+            cards.Add(card.index, card.count);
+        }
+
+        currentDeckIndex = index;
+        currentDeckName = deck.name;
+        currentDeckCards = cards;
+        StateHasChanged();
+    }
+
+    private async Task HandleSaveClick()
+    {
+        var cards = currentDeckCards.Select((pair) => new DeckCard(pair.Key, pair.Value)).ToArray();
+        var deck = new Deck(currentDeckName, cardSet.Iteration, cards);
+        var result = await JS.InvokeAsync<bool>("saveDeck", currentDeckIndex, deck);
     }
 
     private void HandleAddCardClick(int index)
     {
         int count = 0;
-        if (currentDeck.TryGetValue(index, out count))
+        if (currentDeckCards.TryGetValue(index, out count))
         {
             if (count < 2)
             {
-                currentDeck[index] = 2;
+                currentDeckCards[index] = 2;
             }
         }
         else
         {
-            currentDeck.Add(index, 1);
+            currentDeckCards.Add(index, 1);
         }
         StateHasChanged();
     }
@@ -79,15 +124,15 @@
     private void HandleRemoveCardClick(int index)
     {
         int count = 0;
-        if (currentDeck.TryGetValue(index, out count))
+        if (currentDeckCards.TryGetValue(index, out count))
         {
             if (count >= 2)
             {
-                currentDeck[index] = 1;
+                currentDeckCards[index] = 1;
             }
             else
             {
-                currentDeck.Remove(index);
+                currentDeckCards.Remove(index);
             }
         }
         StateHasChanged();

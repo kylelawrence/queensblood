@@ -6,6 +6,26 @@
     width: 100%;
 }
 
+.decks-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 10px;
+    /* align-content: flex-start; */
+    gap: 20px;
+}
+
+.save {
+    margin-left: auto;
+    background: gold;
+    color: #222;
+    width: 100px;
+    height: 35px;
+    font-weight: bold;
+    border-radius: 10px;
+    border: solid 3px silver;
+}
+
 .deck-name-input {
     background: transparent;
     color: white;
@@ -60,5 +80,9 @@
     width: 35px;
     height: 35px;
     cursor: pointer;
-    margin: 0 5px;
+}
+
+.deck-select-button.selected {
+    border-color: gold;
+    color: gold;
 }
