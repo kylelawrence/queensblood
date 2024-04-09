@@ -1,7 +1,7 @@
 @page "/decks"
 @rendermode InteractiveServer
 @inject ICardsService cardsService
-@inject IJSRuntime JS
+@inject IDecksService decksService
 
 <PageTitle>Queen's Blood - Manage Decks</PageTitle>
 
@@ -27,7 +27,7 @@
     <div class="active-deck">
         @foreach (var pair in currentDeckCards)
         {
-            var card = cardSet.Cards[pair.Key];
+            var card = cards[pair.Key];
             <div class="card-holder">
                 <CardView CardModel="@card" OnClick="(Card _) => HandleRemoveCardClick(pair.Key)" />
                 <div>@pair.Value/2</div>
@@ -36,10 +36,10 @@
     </div>
 
     <div class="all-cards">
-        @for (var i = 0; i < cardSet.Cards.Count; i++)
+        @for (var i = 0; i < cards.Count; i++)
         {
             var index = i;
-            var card = cardSet.Cards[i];
+            var card = cards[i];
             var usedCount = 0;
             currentDeckCards.TryGetValue(index, out usedCount);
             var count = 2 - usedCount;
@@ -55,57 +55,48 @@
     private int currentDeckIndex = -1;
     private string currentDeckName = "";
     private SortedList<int, int> currentDeckCards = [];
-    private CardSet cardSet = CardSet.Empty;
+    private ReadOnlyCollection<Card> cards = new([]);
 
     protected override void OnInitialized()
     {
-        cardSet = cardsService.GetLatestCardSet();
+        cards = cardsService.Cards;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
-        int selectedDeck = 0;
-        var result = await JS.InvokeAsync<string>("getSelectedDeck");
-        int.TryParse(result, out selectedDeck);
+        var selectedDeck = await decksService.GetSelectedDeck();
         await HandleDeckSelectClick(selectedDeck);
     }
 
     private async Task HandleDeckSelectClick(int index)
     {
-        var deck = await JS.InvokeAsync<Deck>("loadDeck", index);
-        if (deck.name.Equals("!!ERROR!!")) return;
-
-        if (deck.iteration == -1)
-        {
-            currentDeckIndex = index;
-            currentDeckName = deck.name;
-            currentDeckCards = [];
-            StateHasChanged();
-            return;
-        }
-
-        var cards = new SortedList<int, int>();
-        foreach (var card in deck.cards)
-        {
-            cards.Add(card.index, card.count);
-        }
+        var deck = await decksService.LoadDeck(index);
 
         currentDeckIndex = index;
         currentDeckName = deck.name;
-        currentDeckCards = cards;
+        currentDeckCards = new();
+        foreach (var card in deck.cards)
+        {
+            // Clamp values of cards
+            if (card.index < 0 || card.index >= cards.Count) continue;
+            currentDeckCards.Add(card.index, Math.Clamp(card.count, 1, 2));
+        }
         StateHasChanged();
     }
 
     private async Task HandleSaveClick()
     {
-        var cards = currentDeckCards.Select((pair) => new DeckCard(pair.Key, pair.Value)).ToArray();
-        var deck = new Deck(currentDeckName, cardSet.Iteration, cards);
-        var result = await JS.InvokeAsync<bool>("saveDeck", currentDeckIndex, deck);
+        if (currentDeckIndex < 0) return;
+
+        var cards = currentDeckCards.Select((pair) => new DeckCard(pair.Key, pair.Value));
+        await decksService.SaveDeck(currentDeckIndex, currentDeckName, cards.ToArray());
     }
 
     private void HandleAddCardClick(int index)
     {
+        if (currentDeckIndex < 0) return;
+
         int count = 0;
         if (currentDeckCards.TryGetValue(index, out count))
         {
@@ -123,6 +114,8 @@
 
     private void HandleRemoveCardClick(int index)
     {
+        if (currentDeckIndex < 0) return;
+
         int count = 0;
         if (currentDeckCards.TryGetValue(index, out count))
         {

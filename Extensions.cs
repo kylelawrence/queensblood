@@ -3,32 +3,35 @@ using queensblood.Components.Parts;
 
 namespace queensblood;
 
+public record TryResult<T>(bool Success, T Value);
+
 public static class Extensions
 {
     public static async Task<bool> Try(this Func<Task> func)
     {
-        try
-        {
-            await func().ConfigureAwait(false);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        try { await func().ConfigureAwait(false); }
+        catch { return false; }
+        return true;
     }
 
     public static async Task<bool> Try(this Task task)
     {
-        try
-        {
-            await task.ConfigureAwait(false);
-            return true;
-        }
-        catch
-        {
-            return false;
-        }
+        try { await task.ConfigureAwait(false); }
+        catch { return false; }
+        return true;
+    }
+
+    public static async ValueTask<TryResult<T>> Try<T>(this ValueTask<T> task)
+    {
+        try { return new(true, await task.ConfigureAwait(false)); }
+        catch { return new(false, default!); }
+    }
+
+    public static async ValueTask<bool> Try(this ValueTask task)
+    {
+        try { await task.ConfigureAwait(false); }
+        catch { return false; }
+        return true;
     }
 
     public static string MaybeClass(this ComponentBase component, string className, bool check)

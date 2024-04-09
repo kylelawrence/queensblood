@@ -1,18 +1,20 @@
 using queensblood;
 using queensblood.Components;
 
-using MongoDB.Driver;
+// using MongoDB.Driver;
 
-var dbConnect = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING");
-var dbClient = new MongoClient(dbConnect);
-var db = dbClient.GetDatabase("queensblood");
+// var dbConnect = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING");
+// var dbClient = new MongoClient(dbConnect);
 
 var builder = WebApplication.CreateBuilder(args);
-var cardsService = new CardsMongoService(db);
 
 // Add services to the container.
 builder.Services
-    .AddSingleton<ICardsService>(cardsService)
+    // .AddSingleton(dbClient.GetDatabase("queensblood"))
+    .AddSingleton<ICardsService, CardsStaticService>()
+    .AddSingleton<IGamesService, GamesMongoService>()
+    .AddScoped<IDecksService, DecksLocalService>()
+    // .AddSingleton<ICardSetService, CardSetMongoService>() // Obselete
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -22,14 +24,16 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    // The default HSTS value is 30 days. You may want to change 
+    //this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
 app.UseAntiforgery();
+
+app.MapPlayRoutes();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -5,37 +5,22 @@ function saveDeck(index, deck) {
         const key = `deck${index}`;
         const value = JSON.stringify(deck);
         localStorage.setItem(key, value);
-        return true;
-    } catch {
-        return false;
-    }
+    } catch { }
 }
 
 function loadDeck(index) {
-    try {
-        const key = `deck${index}`;
-        const value = localStorage.getItem(key);
-        if (!value) {
-            localStorage.setItem(SELECTED_DECK_KEY, index);
-            return {
-                name: key,
-                iteration: -1,
-                cards: []
-            };
-        }
-        const deck = JSON.parse(value);
+    const key = `deck${index}`;
+    let deck = { name: key, cards: [] };
 
-        localStorage.setItem(SELECTED_DECK_KEY, index);
-        return deck;
-    } catch {
-        return {
-            name: "!!ERROR!!",
-            iteration: -1,
-            cards: []
-        };
-    }
+    try {
+        const value = localStorage.getItem(key);
+        if (value) deck = JSON.parse(value);
+    } catch { }
+
+    localStorage.setItem(SELECTED_DECK_KEY, index);
+    return deck;
 }
 
 function getSelectedDeck() {
-    return localStorage.getItem(SELECTED_DECK_KEY);
+    return localStorage.getItem(SELECTED_DECK_KEY) ?? "0";
 }
