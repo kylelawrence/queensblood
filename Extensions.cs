@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using Microsoft.AspNetCore.Components;
 using queensblood.Components.Parts;
 
@@ -37,6 +38,15 @@ public static class Extensions
     public static string MaybeClass(this ComponentBase component, string className, bool check)
     {
         return check ? className : "";
+    }
+
+    public static bool NeedsToGoHome(this HttpContext context)
+    {
+        if (context.User.Identity is null || !context.User.Identity.IsAuthenticated) {
+            BaseHandlers.GoHome(context);
+            return true;
+        }
+        return false;
     }
 
     private static readonly int[] fieldValues = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216];

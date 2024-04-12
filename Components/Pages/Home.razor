@@ -1,46 +1,50 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject IPlayerService playerService
+@inject IGamesService gamesService;
+
+@using RNG = System.Security.Cryptography.RandomNumberGenerator
 
 <PageTitle>Queen&#39;s Blood</PageTitle>
 
 <div class="home-box">
     <h1 class="title">Queen&#39;s Blood</h1>
-    <a href="/play">Start game</a>
-    <a href="/decks">Manage decks</a>
+    <div class="controls-container">
+        @if (existingGame.IsActive)
+        {
+            <form action="/play/@(existingGame.Id)" method="POST">
+                <AntiforgeryToken />
+                <button type="submit" class="mainlink">Continue game @(existingGame.Id)</button>
+            </form>
+            <form action="/forfeit/@(existingGame.Id)" method="POST">
+                <AntiforgeryToken />
+                <button type="submit" class="forfeit"><span>-&gt;</span> forfeit and start new <span>&lt;-</span></button>
+            </form>
+        }
+        else
+        {
+            <form action="/play" method="POST">
+                <AntiforgeryToken />
+                <button type="submit" class="mainlink">Start new game</button>
+            </form>
+        }
+        <a href="/decks" class="mainlink deckslink">Manage decks</a>
+    </div>
 </div>
 
-<style>
-    .home-box {
-        padding-bottom: 5%;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-    }
+@code {
+    [CascadingParameter]
+    public HttpContext? context { get; set; }
 
-    .title {
-        font-family: luminari;
-        letter-spacing: 4px;
-    }
+    private string playerId = "";
+    private Game existingGame = Game.None;
 
-    a {
-        width: 250px;
-        margin: 5px;
-        padding: 5px;
-        border: solid 2px #999;
-        border-radius: 8px;
-        font-size: 24px;
-        color: inherit;
-        text-align: center;
-        text-decoration: none;
-    }
+    protected override void OnInitialized()
+    {
+        if (context == null) return;
 
-    a:hover {
-        border-color: #ddd;
-        background: #444;
+        playerId = playerService.EnsurePlayerId(context);
+        existingGame = gamesService.FindGameByPlayerId(playerId);
+        StateHasChanged();
     }
-
-    a:visited {
-        color: inherit;
-    }
-</style>
+}

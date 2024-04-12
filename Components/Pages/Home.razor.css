@@ -1,0 +1,62 @@
+.home-box {
+    padding-bottom: 5%;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.title {
+    font-family: luminari;
+    letter-spacing: 4px;
+}
+
+.controls-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.mainlink {
+    width: 250px;
+    padding: 5px;
+    border: solid 2px #999;
+    border-radius: 8px;
+    font-size: 24px;
+    color: inherit;
+    text-align: center;
+    text-decoration: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.mainlink:hover,
+.mainlink:hover {
+    border-color: #ddd;
+    background: #444;
+}
+
+.mainlink:visited {
+    color: inherit;
+}
+
+.deckslink {
+    margin-top: 10px;
+}
+
+.forfeit {
+    all: unset;
+    cursor: pointer;
+    margin-right: 10px;
+    font-size: 12px;
+    font-style: italic;
+}
+
+.forfeit span {
+    color: transparent;
+}
+
+.forfeit:hover span {
+    color: inherit;
+}

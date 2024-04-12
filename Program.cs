@@ -5,16 +5,18 @@ using queensblood.Components;
 
 // var dbConnect = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING");
 // var dbClient = new MongoClient(dbConnect);
+// .AddSingleton(dbClient.GetDatabase("queensblood"))
+// .AddSingleton<ICardSetService, CardSetMongoService>() // Obselete
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services
-    // .AddSingleton(dbClient.GetDatabase("queensblood"))
     .AddSingleton<ICardsService, CardsStaticService>()
-    .AddSingleton<IGamesService, GamesMongoService>()
-    .AddScoped<IDecksService, DecksLocalService>()
-    // .AddSingleton<ICardSetService, CardSetMongoService>() // Obselete
+    .AddSingleton<IGamesService, GamesMemService>()
+    .AddSingleton<IPlayerService, PlayerMemService>()
+    // Local Decks depends on IJSRuntime, so it gets scoped to user
+    .AddScoped<IDecksService, DecksLocalService>() 
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
