@@ -16,3 +16,7 @@ body {
     display: grid;
     place-items: center;
 }
+
+.full-width {
+    width: 100%;
+}

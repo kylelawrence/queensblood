@@ -1,0 +1,39 @@
+@inject ICardsService cardsService
+
+<div class="container">
+    <div class="field-grid-container">
+        <div class="field-grid">
+            @for (var i = 0; i < 3; i++)
+            {
+                <div class="player1-row score cell">score</div>
+                @for (var j = 0; j < 5; j++)
+                {
+                    <div class="field-card cell">card</div>
+                }
+                <div class="player2-row score cell">score</div>
+            }
+        </div>
+    </div>
+    <div class="hands">
+        <div class="hand">
+            <CardView CardModel="cards[0]" />
+            <CardView CardModel="cards[1]" />
+            <CardView CardModel="cards[2]" />
+            <CardView CardModel="cards[3]" />
+            <CardView CardModel="cards[4]" />
+        </div>
+        <div class="hand">
+            <CardView CardModel="Card.New" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Game Game { get; set; } = Game.None;
+    private ReadOnlyCollection<Card> cards = new([]);
+
+    protected override void OnInitialized()
+    {
+        cards = cardsService.Cards;
+    }
+}

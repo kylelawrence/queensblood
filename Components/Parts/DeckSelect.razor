@@ -1,0 +1,47 @@
+@inject IDecksService decksService
+@inject ICardsService cardsService
+
+<div class="container">
+    <div class="decks-header">
+        <span>Choose deck:</span>
+        <DeckSelectButtons SelectedDeck="selectedDeckIndex" OnDeckClicked="SelectDeck" />
+        <button type="button" class="start" @onclick="HandleStartClick">Start game</button>
+    </div>
+    <div class="all-cards">
+        @foreach (var deckCard in selectedDeck.cards)
+        {
+            var cardModel = cards[deckCard.index];
+            <div class="card-holder">
+                <CardView CardModel="cardModel" />
+                <div>@deckCard.count/2</div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Action<Deck> OnStartGame { get; set; } = _ => { };
+
+    private int selectedDeckIndex = 0;
+    private Deck selectedDeck = new([]);
+    private ReadOnlyCollection<Card> cards = new([]);
+
+    protected override async Task OnInitializedAsync()
+    {
+        cards = cardsService.Cards;
+        selectedDeckIndex = await decksService.GetSelectedDeck();
+        selectedDeck = await decksService.LoadDeck(selectedDeckIndex);
+    }
+
+    private async Task SelectDeck(int index)
+    {
+        selectedDeckIndex = index;
+        selectedDeck = await decksService.LoadDeck(selectedDeckIndex);
+        StateHasChanged();
+    }
+
+    public void HandleStartClick()
+    {
+        OnStartGame(selectedDeck);
+    }
+}

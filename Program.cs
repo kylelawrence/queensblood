@@ -12,11 +12,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services
+    .AddHttpContextAccessor()
     .AddSingleton<ICardsService, CardsStaticService>()
     .AddSingleton<IGamesService, GamesMemService>()
-    .AddSingleton<IPlayerService, PlayerMemService>()
+    .AddSingleton<IPlayersService, PlayersMemService>()
     // Local Decks depends on IJSRuntime, so it gets scoped to user
-    .AddScoped<IDecksService, DecksLocalService>() 
+    .AddScoped<IDecksService, DecksLocalService>()
+    .AddScoped<IPlayerIdAccessor, PlayerIdAccessor>()
     .AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -35,7 +37,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapPlayRoutes();
+app.Use((context, next) => {
+    var playersService = context.RequestServices.GetService<IPlayersService>()!;
+    playersService.EnsurePlayerId(context);
+    return next(context);
+});
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

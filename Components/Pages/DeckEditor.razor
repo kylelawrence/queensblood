@@ -1,5 +1,4 @@
 @page "/decks"
-@rendermode InteractiveServer
 @inject ICardsService cardsService
 @inject IDecksService decksService
 
@@ -8,19 +7,8 @@
 <div class="decks-container">
     <div class="decks-header">
         <span>Your decks:</span>
-        @for (var i = 0; i < 5; i += 1)
-        {
-            var index = i;
-            var label = i + 1;
-            <button type="button" class="deck-select-button @this.MaybeClass("selected", currentDeckIndex == index)"
-                @onclick="() => HandleDeckSelectClick(index)">
-                @label
-            </button>
-        }
-        <label>
-            <span>Deck nickname:</span>
-            <InputText class="deck-name-input" @bind-Value="currentDeckName" />
-        </label>
+        <DeckSelectButtons SelectedDeck="@currentDeckIndex" OnDeckClicked="@HandleDeckSelectClick" />
+        <span>Cards: @GetCurrentDeckCardCount() / 15</span>
         <button type="button" class="save" @onclick="HandleSaveClick">Save deck</button>
     </div>
 
@@ -53,7 +41,6 @@
 
 @code {
     private int currentDeckIndex = -1;
-    private string currentDeckName = "";
     private SortedList<int, int> currentDeckCards = [];
     private ReadOnlyCollection<Card> cards = new([]);
 
@@ -74,7 +61,6 @@
         var deck = await decksService.LoadDeck(index);
 
         currentDeckIndex = index;
-        currentDeckName = deck.name;
         currentDeckCards = new();
         foreach (var card in deck.cards)
         {
@@ -90,12 +76,13 @@
         if (currentDeckIndex < 0) return;
 
         var cards = currentDeckCards.Select((pair) => new DeckCard(pair.Key, pair.Value));
-        await decksService.SaveDeck(currentDeckIndex, currentDeckName, cards.ToArray());
+        await decksService.SaveDeck(currentDeckIndex, cards.ToArray());
     }
 
     private void HandleAddCardClick(int index)
     {
         if (currentDeckIndex < 0) return;
+        if (GetCurrentDeckCardCount() >= 15) return;
 
         int count = 0;
         if (currentDeckCards.TryGetValue(index, out count))
@@ -129,5 +116,10 @@
             }
         }
         StateHasChanged();
+    }
+
+    private int GetCurrentDeckCardCount()
+    {
+        return currentDeckCards.Sum((pair) => pair.Value);
     }
 }

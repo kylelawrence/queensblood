@@ -1,50 +1,36 @@
 ﻿@page "/"
-@rendermode InteractiveServer
-@inject IPlayerService playerService
-@inject IGamesService gamesService;
+@inject IPlayerIdAccessor playerIdAccessor
+@inject IGamesService gamesService
+@inject IHttpContextAccessor contextAccessor
 
 @using RNG = System.Security.Cryptography.RandomNumberGenerator
 
 <PageTitle>Queen&#39;s Blood</PageTitle>
 
 <div class="home-box">
+    <h1></h1>
     <h1 class="title">Queen&#39;s Blood</h1>
     <div class="controls-container">
         @if (existingGame.IsActive)
         {
-            <form action="/play/@(existingGame.Id)" method="POST">
-                <AntiforgeryToken />
-                <button type="submit" class="mainlink">Continue game @(existingGame.Id)</button>
-            </form>
-            <form action="/forfeit/@(existingGame.Id)" method="POST">
-                <AntiforgeryToken />
-                <button type="submit" class="forfeit"><span>-&gt;</span> forfeit and start new <span>&lt;-</span></button>
-            </form>
+            <a href="/play/@(existingGame.Id)" class="mainlink">Continue game @(existingGame.Id)</a>
+            <a href="/forfeit" class="forfeit"><span>-&gt;</span> forfeit and start new <span>&lt;-</span></a>
         }
         else
         {
-            <form action="/play" method="POST">
-                <AntiforgeryToken />
-                <button type="submit" class="mainlink">Start new game</button>
-            </form>
+            <a href="/play" class="mainlink">Start new game</a>
         }
         <a href="/decks" class="mainlink deckslink">Manage decks</a>
     </div>
 </div>
 
 @code {
-    [CascadingParameter]
-    public HttpContext? context { get; set; }
-
     private string playerId = "";
     private Game existingGame = Game.None;
 
     protected override void OnInitialized()
     {
-        if (context == null) return;
-
-        playerId = playerService.EnsurePlayerId(context);
+        playerId = playerIdAccessor.GetPlayerId();
         existingGame = gamesService.FindGameByPlayerId(playerId);
-        StateHasChanged();
     }
 }

@@ -1,0 +1,46 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.hands {
+    border: solid 1px red;
+    display: flex;
+    flex-direction: row;
+    height: 210px;
+    justify-content: space-between;
+}
+
+.hand {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    padding-right: 4px;
+}
+
+.field-grid-container {
+    border: solid 1px blue;
+    flex-grow: 1;
+    display: grid;
+    place-items: center;
+    ;
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 100px);
+    grid-template-rows: repeat(3, 160px);
+}
+
+.cell {
+    border: solid 1px silver;
+}
+
+.score {}
+
+.player1-row.score {}
+
+.player2-row.score {}
+
+.field-cell {}

@@ -1,0 +1,57 @@
+@page "/play/{GameId}"
+@inject IGamesService gamesService
+@inject NavigationManager navigation
+@inject IPlayerIdAccessor playerIdAccessor
+
+@if (NeedsToPickDeck())
+{
+    <DeckSelect OnStartGame="HandleStartGame" />
+}
+else
+{
+    <Playing Game="game" />
+}
+
+
+@code {
+    [Parameter]
+    public string GameId { get; set; } = "";
+
+    private string playerId = "";
+    private Game game = Game.None;
+    private PlayerType playerType = PlayerType.Undecided;
+    private bool isPlayer1 = false;
+    private bool isPlayer2 = false;
+    private Deck deck = Deck.None;
+
+    private bool IsPlayer { get => isPlayer1 || isPlayer2; }
+
+    protected override void OnInitialized()
+    {
+        game = gamesService.FindGameById(GameId);
+        if (!game.IsActive)
+        {
+            navigation.NavigateTo("/");
+            return;
+        }
+
+        playerId = playerIdAccessor.GetPlayerId();
+        playerType = game.Join(playerId);
+
+        isPlayer1 = playerType == PlayerType.Player1;
+        isPlayer2 = playerType == PlayerType.Player2;
+    }
+
+    private bool NeedsToPickDeck()
+    {
+        var isPlayer = isPlayer1 || isPlayer2;
+        var pickingDecks = game.State == GameState.PickingDecks;
+        return isPlayer && pickingDecks && (deck == Deck.None);
+    }
+
+    private void HandleStartGame(Deck deck)
+    {
+        this.deck = deck;
+        StateHasChanged();
+    }
+}

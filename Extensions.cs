@@ -1,6 +1,4 @@
-using System.Security.Cryptography;
 using Microsoft.AspNetCore.Components;
-using queensblood.Components.Parts;
 
 namespace queensblood;
 
@@ -40,21 +38,25 @@ public static class Extensions
         return check ? className : "";
     }
 
-    public static bool NeedsToGoHome(this HttpContext context)
+    public static bool TryGetCookie(this HttpContext context, string cookieName, out string? value)
     {
-        if (context.User.Identity is null || !context.User.Identity.IsAuthenticated) {
-            BaseHandlers.GoHome(context);
-            return true;
-        }
-        return false;
+        return context.Request.Cookies.TryGetValue(cookieName, out value);
     }
 
-    private static readonly int[] fieldValues = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216];
+    public static void SetCookie(this HttpContext context, string cookieName, string value)
+    {
+        context.Response.Cookies.Append(cookieName, value);
+    }
+
+    private static readonly int[] fieldValues =
+        [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216];
+
     public static bool FieldIsBoosted(this Card card, int index)
     {
         if (index < 0 || index > 24 || index == 12) return false;
         return (card.Boosts & fieldValues[index]) != 0;
     }
+
     public static Card ToggleBoost(this Card card, int index)
     {
         if (index < 0 || index > 24 || index == 12) return card;

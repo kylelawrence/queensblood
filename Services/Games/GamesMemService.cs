@@ -2,32 +2,9 @@ using RNG = System.Security.Cryptography.RandomNumberGenerator;
 
 namespace queensblood;
 
-public class Game(string id)
-{
-    public static readonly Game None = new("");
-
-    public string Id { get; } = id;
-
-    public string PlayerAId { get; set; } = "";
-
-    public bool IsActive
-    {
-        get
-        {
-            return !string.IsNullOrWhiteSpace(Id);
-        }
-    }
-}
-
-public interface IGamesService
-{
-    bool TryCreateGame(string playerId, out Game Game);
-    Game FindGameByPlayerId(string playerId);
-}
-
 public class GamesMemService : IGamesService
 {
-    private static string GetNewId() => RNG.GetHexString(4);
+    private static string GetNewId() => RNG.GetHexString(6);
 
     private readonly Dictionary<string, Game> gamesById = [];
     private readonly Dictionary<string, Game> gamesByPlayerId = [];
@@ -44,10 +21,7 @@ public class GamesMemService : IGamesService
         var id = GetNewId();
         while (gamesById.ContainsKey(id)) id = GetNewId();
 
-        game = new Game(id)
-        {
-            PlayerAId = playerId
-        };
+        game = new Game(id, playerId);
 
         gamesById[id] = game;
         gamesByPlayerId[playerId] = game;
@@ -58,5 +32,10 @@ public class GamesMemService : IGamesService
     public Game FindGameByPlayerId(string playerId)
     {
         return gamesByPlayerId.TryGetValue(playerId, out var game) ? game : Game.None;
+    }
+
+    public Game FindGameById(string gameId)
+    {
+        return gamesById.TryGetValue(gameId, out var game) ? game : Game.None;
     }
 }

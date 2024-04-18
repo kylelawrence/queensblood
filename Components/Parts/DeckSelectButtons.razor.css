@@ -1,0 +1,14 @@
+.deck-select-button {
+    color: white;
+    background: transparent;
+    border: solid 3px white;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    cursor: pointer;
+}
+
+.deck-select-button.selected {
+    border-color: gold;
+    color: gold;
+}
