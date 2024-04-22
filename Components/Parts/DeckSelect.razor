@@ -1,5 +1,4 @@
 @inject IDecksService decksService
-@inject ICardsService cardsService
 
 <div class="container">
     <div class="decks-header">
@@ -10,7 +9,7 @@
     <div class="all-cards">
         @foreach (var deckCard in selectedDeck.cards)
         {
-            var cardModel = cards[deckCard.index];
+            var cardModel = Cards.At(deckCard.index);
             <div class="card-holder">
                 <CardView CardModel="cardModel" />
                 <div>@deckCard.count/2</div>
@@ -24,11 +23,9 @@
 
     private int selectedDeckIndex = 0;
     private Deck selectedDeck = new([]);
-    private ReadOnlyCollection<Card> cards = new([]);
 
     protected override async Task OnInitializedAsync()
     {
-        cards = cardsService.Cards;
         selectedDeckIndex = await decksService.GetSelectedDeck();
         selectedDeck = await decksService.LoadDeck(selectedDeckIndex);
     }

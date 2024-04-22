@@ -1,5 +1,4 @@
 @page "/decks"
-@inject ICardsService cardsService
 @inject IDecksService decksService
 
 <PageTitle>Queen's Blood - Manage Decks</PageTitle>
@@ -8,14 +7,14 @@
     <div class="decks-header">
         <span>Your decks:</span>
         <DeckSelectButtons SelectedDeck="@currentDeckIndex" OnDeckClicked="@HandleDeckSelectClick" />
-        <span>Cards: @GetCurrentDeckCardCount() / 15</span>
+        <span>Cards: @GetCurrentDeckCardCount() / @Deck.DECK_SIZE</span>
         <button type="button" class="save" @onclick="HandleSaveClick">Save deck</button>
     </div>
 
     <div class="active-deck">
         @foreach (var pair in currentDeckCards)
         {
-            var card = cards[pair.Key];
+            var card = Cards.At(pair.Key);//cards[pair.Key];
             <div class="card-holder">
                 <CardView CardModel="@card" OnClick="(Card _) => HandleRemoveCardClick(pair.Key)" />
                 <div>@pair.Value/2</div>
@@ -24,10 +23,10 @@
     </div>
 
     <div class="all-cards">
-        @for (var i = 0; i < cards.Count; i++)
+        @for (var i = 0; i < Cards.Count; i++)
         {
             var index = i;
-            var card = cards[i];
+            var card = Cards.At(i);
             var usedCount = 0;
             currentDeckCards.TryGetValue(index, out usedCount);
             var count = 2 - usedCount;
@@ -42,12 +41,6 @@
 @code {
     private int currentDeckIndex = -1;
     private SortedList<int, int> currentDeckCards = [];
-    private ReadOnlyCollection<Card> cards = new([]);
-
-    protected override void OnInitialized()
-    {
-        cards = cardsService.Cards;
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -65,7 +58,7 @@
         foreach (var card in deck.cards)
         {
             // Clamp values of cards
-            if (card.index < 0 || card.index >= cards.Count) continue;
+            if (card.index < 0 || card.index >= Cards.Count) continue;
             currentDeckCards.Add(card.index, Math.Clamp(card.count, 1, 2));
         }
         StateHasChanged();
@@ -82,7 +75,7 @@
     private void HandleAddCardClick(int index)
     {
         if (currentDeckIndex < 0) return;
-        if (GetCurrentDeckCardCount() >= 15) return;
+        if (GetCurrentDeckCardCount() >= Deck.DECK_SIZE) return;
 
         int count = 0;
         if (currentDeckCards.TryGetValue(index, out count))

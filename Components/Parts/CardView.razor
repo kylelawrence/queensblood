@@ -1,32 +1,40 @@
 <div class="card @(this.MaybeClass("selected", Selected))" @onclick="HandleClick">
-    <div class="pin-cost">
-        @for (var i = 0; i < CardModel.PinCost; i++)
-        {
-            <img title="pin cost" src="/black-pawn.svg" />
-        }
-    </div>
-    <div class="value">@CardModel.Value</div>
-    <div class="field">
+    @if (Simple)
+    {
+        <div class="value">@CardModel.Value</div>
+    }
+    else
+    {
+        <div class="pin-cost">
+            @for (var i = 0; i < CardModel.PinCost; i++)
+            {
+                <img title="pin cost" src="/black-pawn.svg" />
+            }
+        </div>
+        <div class="value">@CardModel.Value</div>
+        <div class="field">
         @for (var i = 0; i < 25; i++)
-        {
-            var index = i;
-            var onClick = () => OnFieldClick(index);
+            {
+                var index = i;
+                var onClick = () => OnFieldClick(index);
 
-            var middle = this.MaybeClass("field-middle", index == 12);
-            var boosted = this.MaybeClass("field-boosted", CardModel.FieldIsBoosted(index));
-            var classList = $"{middle} {boosted}";
+                var middle = this.MaybeClass("field-middle", index == 12);
+                var boosted = this.MaybeClass("field-boosted", CardModel.FieldIsBoosted(index));
+                var classList = $"{middle} {boosted}";
 
-            <div class="@classList" @onclick="onClick"></div>
-        }
-    </div>
-    <div class="name">
-        <svg viewBox="0 0 200 28">
-            <text x="100" y="18" text-anchor="middle" fill="white" font-size="20px">@CardModel.Name</text>
-        </svg>
-    </div>
+                <div class="@classList" @onclick="onClick"></div>
+            }
+        </div>
+        <div class="name">
+            <svg viewBox="0 0 200 28">
+                <text x="100" y="18" text-anchor="middle" fill="white" font-size="20px">@CardModel.Name</text>
+            </svg>
+        </div>
+    }
 </div>
 
 @code {
+    [Parameter] public bool Simple { get; set; }
     [Parameter] public bool Selected { get; set; }
     [Parameter] public Card CardModel { get; set; } = CardHelper.Blank;
     [Parameter] public Action<Card> OnClick { get; set; } = (Card card) => { };

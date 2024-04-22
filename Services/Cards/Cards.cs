@@ -2,14 +2,10 @@ using System.Collections.ObjectModel;
 
 namespace queensblood;
 
-public class CardsStaticService : ICardsService
+public static class Cards
 {
-    public ReadOnlyCollection<Card> Cards { get; private set; }
-
-    public CardsStaticService()
-    {
-        var cards = new Card[]
-        {
+    private static readonly Card[] cards =
+        [
             new("Security Officer", 1, 1, 141440),
             new("Riot Trooper", 2, 3, 4333700),
             new("J-Unit Sweeper", 2, 2, 393600),
@@ -28,8 +24,11 @@ public class CardsStaticService : ICardsService
             new("Screamer", 3, 1, 469440),
             new("Flan", 1, 2, 67648),
             new("Crawler", 1, 2, 196800)
-        };
+        ];
 
-        Cards = new ReadOnlyCollection<Card>(cards);
-    }
+    public static Card At(int index) => cards[index];
+
+    public static readonly int Count = cards.Length;
+
+    public static readonly ReadOnlyCollection<Card> All = new(cards);
 }

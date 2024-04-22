@@ -12,7 +12,6 @@ else
     <Playing Game="game" />
 }
 
-
 @code {
     [Parameter]
     public string GameId { get; set; } = "";
@@ -40,6 +39,15 @@ else
 
         isPlayer1 = playerType == PlayerType.Player1;
         isPlayer2 = playerType == PlayerType.Player2;
+        
+        if (isPlayer1)
+        {
+            deck = game.Player1Deck;
+        }
+        else if (isPlayer2)
+        {
+            deck = game.Player2Deck;
+        }
     }
 
     private bool NeedsToPickDeck()
@@ -51,7 +59,9 @@ else
 
     private void HandleStartGame(Deck deck)
     {
+        if (!deck.IsValid) return;
         this.deck = deck;
+        game.PickDeck(playerId, deck);
         StateHasChanged();
     }
 }

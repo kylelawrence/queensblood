@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 
 namespace queensblood;
 
@@ -62,5 +63,11 @@ public static class Extensions
         if (index < 0 || index > 24 || index == 12) return card;
         var newBoosts = card.Boosts ^ fieldValues[index];
         return new(card.Name, card.PinCost, card.Value, newBoosts);
+    }
+
+    public static bool IsConnected(this CircuitHandler handler)
+    {
+        var asService = handler as CircuitService;
+        return asService?.IsConnected ?? false;
     }
 }

@@ -6,8 +6,8 @@ public enum GameState
 {
     PickingDecks,
     Mulligan,
-    PlayerATurn,
-    PlayerBTurn,
+    Player1Turn,
+    Player2Turn,
     GameOver,
 }
 
@@ -19,7 +19,12 @@ public enum PlayerType
     Undecided,
 }
 
-public class Game(string id, string playerAId)
+public enum GameEventType
+{
+    DecksPicked,
+}
+
+public class Game(string id, string player1Id)
 {
     public static readonly Game None = new("", "");
 
@@ -31,17 +36,19 @@ public class Game(string id, string playerAId)
 
     public GameState State { get; private set; } = GameState.PickingDecks;
 
-    private readonly string PlayerAId = playerAId;
+    private readonly string player1Id = player1Id;
 
-    public Deck PlayerADeck { get; private set; } = new Deck([]);
+    public Deck Player1Deck { get; private set; } = Deck.None;
 
-    public List<int> PlayerAHand { get; } = [];
+    public List<int> Player1Hand { get; } = [];
 
-    private string PlayerBId = "";
+    private string player2Id = "";
 
-    public Deck PlayerBDeck { get; private set; } = new Deck([]);
+    public Deck Player2Deck { get; private set; } = Deck.None;
 
-    public List<int> PlayerBHand { get; } = [];
+    public List<int> Player2Hand { get; } = [];
+
+    public event EventHandler OnGameUpdated = delegate { };
 
     public bool IsActive
     {
@@ -59,10 +66,11 @@ public class Game(string id, string playerAId)
     {
         LastUpdated = DateTime.Now;
 
-        if (playerId == PlayerAId) return PlayerType.Player1;
-        if (string.IsNullOrEmpty(PlayerBId))
+        if (playerId == player1Id) return PlayerType.Player1;
+        if (playerId == player2Id) return PlayerType.Player2;
+        if (string.IsNullOrEmpty(player2Id))
         {
-            PlayerBId = playerId;
+            player2Id = playerId;
             return PlayerType.Player2;
         }
         return PlayerType.Spectator;
@@ -71,14 +79,21 @@ public class Game(string id, string playerAId)
     public void PickDeck(string playerId, Deck deck)
     {
         LastUpdated = DateTime.Now;
-        
-        if (playerId == PlayerAId)
+
+        if (playerId == player1Id && Player1Deck == Deck.None)
         {
-            PlayerADeck = deck;
+            Player1Deck = deck;
         }
-        else if (playerId == PlayerBId)
+        else if (playerId == player2Id && Player2Deck == Deck.None)
         {
-            PlayerBDeck = deck;
+            Player2Deck = deck;
         }
+
+        if (Player1Deck != Deck.None && Player2Deck != Deck.None)
+        {
+            State = GameState.Mulligan;
+        }
+
+        OnGameUpdated(this, EventArgs.Empty);
     }
 }
