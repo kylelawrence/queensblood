@@ -1,36 +1,105 @@
 @inherits GameWatcher
 
-@if (Game.State == GameState.PickingDecks)
-{
-    <div class="middle full-width">
-        Waiting for other player...
-    </div>
-}
-else
-{
-    <div class="container">
-    <div class="field-grid-container">
-        <div class="field-grid">
-            @for (var i = 0; i < 3; i++)
-                {
-                    <div class="player1-row score cell">score</div>
-                    @for (var j = 0; j < 5; j++)
+<div style="flex-grow: 1; display: flex;">
+    @if (Game.State == GameState.PickingDecks)
+    {
+        <div class="middle full-width">
+            Waiting for other player...
+        </div>
+    }
+    else
+    {
+        <div class="container">
+            <div class="field-grid-container">
+                <div class="field-grid">
+                    @for (var i = 0; i < 3; i++)
                     {
-                        <div class="field-card cell">card</div>
+                        <div class="player1-row score cell">score</div>
+                        @for (var j = 0; j < 5; j++)
+                        {
+                            <div class="field-card cell">card</div>
+                        }
+                        <div class="player2-row score cell">score</div>
                     }
-                    <div class="player2-row score cell">score</div>
-                }
+                </div>
+            </div>
+            <div class="hands">
+                <div class="hand">
+                    @for (var i = 0; i < Hand.Count; i++)
+                    {
+                        var index = i;
+                        var onClick = (Card _) => HandleCardClick(index);
+                        var mulliganSelected = Game.State == GameState.Mulligan && IndexesSelectedForMulligan.Contains(index);
+                        var playSelected = CurrentSelectedIndex == index;
+                        var selected = mulliganSelected || playSelected;
+                        <CardView CardModel="@Cards.At(Hand[index])" OnClick="onClick" Selected="selected" />
+                    }
+                </div>
             </div>
         </div>
-        <div class="hands">
-            <div class="hand">
-            </div>
-            <div class="hand">
-                <CardView CardModel="Card.New" />
-            </div>
-        </div>
-    </div>
-}
+        @if (Game.State == GameState.Mulligan)
+        {
+            @if (HasMulliganed)
+            {
+                <div class="middle mulligan-label">
+                    <div>Waiting for other player...</div>
+                </div>
+            }
+            else
+            {
+                <div class="middle mulligan-label">
+                    <div>Mulligan - Pick cards to redraw</div>
+                </div>
+                <button type="button" class="mulligan-button" @onclick="HandleMulligan">Replace cards</button>
+            }
+        }
+    }
+</div>
 
 @code {
+    [Parameter] public string CurrentPlayerId { get; set; } = "";
+    [Parameter] public PlayerType CurrentPlayerType { get; set; } = PlayerType.Undecided;
+
+    private List<int> Hand = [];
+    private List<int> IndexesSelectedForMulligan = [];
+    private int CurrentSelectedIndex = -1;
+
+    private bool HasMulliganed
+    {
+        get
+        {
+            return (CurrentPlayerType == PlayerType.Player1 && Game.Player1Mulliganed) ||
+            (CurrentPlayerType == PlayerType.Player2 && Game.Player2Mulliganed);
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        Hand = Game.GetHand(CurrentPlayerId);
+        StateHasChanged();
+    }
+
+    private void HandleCardClick(int index)
+    {
+        if (Game.State == GameState.Mulligan && !HasMulliganed)
+        {
+            if (IndexesSelectedForMulligan.Contains(index))
+            {
+                IndexesSelectedForMulligan.Remove(index);
+            }
+            else
+            {
+                IndexesSelectedForMulligan.Add(index);
+            }
+        }
+        StateHasChanged();
+    }
+
+    private void HandleMulligan()
+    {
+        if (HasMulliganed) return;
+        Game.Mulligan(CurrentPlayerId, IndexesSelectedForMulligan);
+        IndexesSelectedForMulligan.Clear();
+        StateHasChanged();
+    }
 }

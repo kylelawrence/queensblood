@@ -1,5 +1,3 @@
-using Amazon.SecurityToken.Model;
-
 namespace queensblood;
 
 public enum GameState
@@ -28,6 +26,8 @@ public class Game(string id, string player1Id)
 {
     public static readonly Game None = new("", "");
 
+    public event EventHandler OnGameUpdated = delegate { };
+
     public string Id { get; } = id;
 
     public DateTime Created { get; } = DateTime.Now;
@@ -37,18 +37,20 @@ public class Game(string id, string player1Id)
     public GameState State { get; private set; } = GameState.PickingDecks;
 
     private readonly string player1Id = player1Id;
-
-    public Deck Player1Deck { get; private set; } = Deck.None;
-
-    public List<int> Player1Hand { get; } = [];
-
     private string player2Id = "";
 
-    public Deck Player2Deck { get; private set; } = Deck.None;
+    public bool Player1IsReady => player1Deck.Count > 0;
+    public bool Player2IsReady => player2Deck.Count > 0;
 
-    public List<int> Player2Hand { get; } = [];
+    public bool Player1Mulliganed { get; private set; } = false;
+    public bool Player2Mulliganed { get; private set; } = false;
 
-    public event EventHandler OnGameUpdated = delegate { };
+    private List<int> player1Deck = [];
+    private List<int> player2Deck = [];
+    private List<int> player1Hand = [];
+    private List<int> player2Hand = [];
+
+    private readonly Random random = new();
 
     public bool IsActive
     {
@@ -73,6 +75,7 @@ public class Game(string id, string player1Id)
             player2Id = playerId;
             return PlayerType.Player2;
         }
+        
         return PlayerType.Spectator;
     }
 
@@ -80,20 +83,86 @@ public class Game(string id, string player1Id)
     {
         LastUpdated = DateTime.Now;
 
-        if (playerId == player1Id && Player1Deck == Deck.None)
+        if (playerId == player1Id && !Player1IsReady)
         {
-            Player1Deck = deck;
+            BuildAndShuffle(deck, out player1Deck, out player1Hand);
+
         }
-        else if (playerId == player2Id && Player2Deck == Deck.None)
+        else if (playerId == player2Id && !Player2IsReady)
         {
-            Player2Deck = deck;
+            BuildAndShuffle(deck, out player2Deck, out player2Hand);
         }
 
-        if (Player1Deck != Deck.None && Player2Deck != Deck.None)
+        if (Player1IsReady && Player2IsReady)
         {
             State = GameState.Mulligan;
         }
 
         OnGameUpdated(this, EventArgs.Empty);
+    }
+
+    public void Mulligan(string playerId, List<int> indices)
+    {
+        if (State != GameState.Mulligan) return;
+
+        LastUpdated = DateTime.Now;
+
+        if (playerId == player1Id)
+        {
+            PullAndReplaceCards(player1Hand, player1Deck, indices);
+            Player1Mulliganed = true;
+        }
+        else if (playerId == player2Id)
+        {
+            PullAndReplaceCards(player2Hand, player2Deck, indices);
+            Player2Mulliganed = true;
+        }
+
+        if (Player1Mulliganed && Player2Mulliganed)
+        {
+            State = random.Next(2) == 0 ? GameState.Player1Turn : GameState.Player2Turn;
+        }
+
+        OnGameUpdated(this, EventArgs.Empty);
+    }
+
+    public List<int> GetHand(string playerId)
+    {
+        if (playerId == player1Id) return player1Hand;
+        if (playerId == player2Id) return player2Hand;
+        return [];
+    }
+
+    private void BuildAndShuffle(Deck deck, out List<int> playerDeck, out List<int> playerHand)
+    {
+        playerDeck = [];
+
+        foreach (var card in deck.cards)
+        {
+            playerDeck.Add(card.index);
+            if (card.count == 2) playerDeck.Add(card.index);
+        }
+
+        for (var i = playerDeck.Count - 1; i > 0; --i)
+        {
+            var j = random.Next(i + 1);
+            (playerDeck[j], playerDeck[i]) = (playerDeck[i], playerDeck[j]);
+        }
+
+        playerHand = [.. playerDeck.Take(5)];
+        playerDeck.RemoveRange(0, 5);
+    }
+
+    private static void PullAndReplaceCards(List<int> hand, List<int> deck, List<int> indices)
+    {
+        foreach (var index in indices)
+        {
+            if (index < 0 || index >= hand.Count || deck.Count == 0) continue;
+            var card = hand[index];
+            hand.RemoveAt(index);
+            hand.Add(deck[0]);
+            deck.RemoveAt(0);
+            deck.Add(card);
+        }
     }
 }

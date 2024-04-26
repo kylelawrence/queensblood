@@ -9,23 +9,17 @@
 }
 else
 {
-    <Playing Game="game" />
+    <Playing Game="game" CurrentPlayerId="@playerId" CurrentPlayerType="@playerType" />
 }
 
 @code {
-    [Parameter]
-    public string GameId { get; set; } = "";
+    [Parameter] public string GameId { get; set; } = "";
 
     private string playerId = "";
     private Game game = Game.None;
     private PlayerType playerType = PlayerType.Undecided;
-    private bool isPlayer1 = false;
-    private bool isPlayer2 = false;
-    private Deck deck = Deck.None;
 
-    private bool IsPlayer { get => isPlayer1 || isPlayer2; }
-
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
         game = gamesService.FindGameById(GameId);
         if (!game.IsActive)
@@ -36,31 +30,18 @@ else
 
         playerId = playerIdAccessor.GetPlayerId();
         playerType = game.Join(playerId);
-
-        isPlayer1 = playerType == PlayerType.Player1;
-        isPlayer2 = playerType == PlayerType.Player2;
-        
-        if (isPlayer1)
-        {
-            deck = game.Player1Deck;
-        }
-        else if (isPlayer2)
-        {
-            deck = game.Player2Deck;
-        }
     }
 
     private bool NeedsToPickDeck()
     {
-        var isPlayer = isPlayer1 || isPlayer2;
-        var pickingDecks = game.State == GameState.PickingDecks;
-        return isPlayer && pickingDecks && (deck == Deck.None);
+        if (playerType == PlayerType.Player1 && !game.Player1IsReady) return true;
+        else if (playerType == PlayerType.Player2 && !game.Player2IsReady) return true;
+        return false;
     }
 
     private void HandleStartGame(Deck deck)
     {
         if (!deck.IsValid) return;
-        this.deck = deck;
         game.PickDeck(playerId, deck);
         StateHasChanged();
     }

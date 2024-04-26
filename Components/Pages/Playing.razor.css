@@ -5,7 +5,6 @@
 }
 
 .hands {
-    border: solid 1px red;
     display: flex;
     flex-direction: row;
     height: 210px;
@@ -20,11 +19,9 @@
 }
 
 .field-grid-container {
-    border: solid 1px blue;
     flex-grow: 1;
     display: grid;
     place-items: center;
-    ;
 }
 
 .field-grid {
@@ -35,6 +32,33 @@
 
 .cell {
     border: solid 1px silver;
+}
+
+.mulligan-label {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px;
+    height: 100px;
+    border: solid 3px white;
+    border-radius: 5px;
+    background: darkgray;
+    color: black;
+    font-size: 20px;
+}
+
+.mulligan-button {
+    position: fixed;
+    right: 10%;
+    bottom: 10%;
+    background: gold;
+    color: #222;
+    width: 200px;
+    height: 35px;
+    font-weight: bold;
+    border-radius: 10px;
+    border: solid 3px silver;
 }
 
 .score {}
