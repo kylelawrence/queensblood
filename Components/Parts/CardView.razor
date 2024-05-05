@@ -36,7 +36,7 @@
 @code {
     [Parameter] public bool Simple { get; set; }
     [Parameter] public bool Selected { get; set; }
-    [Parameter] public Card CardModel { get; set; } = CardHelper.Blank;
+    [Parameter] public Card CardModel { get; set; } = Card.Null;
     [Parameter] public Action<Card> OnClick { get; set; } = (Card card) => { };
     [Parameter] public Action<int> OnFieldClick { get; set; } = (int index) => { };
 

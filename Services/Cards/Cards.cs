@@ -26,7 +26,11 @@ public static class Cards
             new("Crawler", 1, 2, 196800)
         ];
 
-    public static Card At(int index) => cards[index];
+    public static Card At(int index) 
+    {
+        if (index < 0 || index >= cards.Length) return Card.Null;
+        return cards[index];
+    }
 
     public static readonly int Count = cards.Length;
 

@@ -7,10 +7,10 @@
 <div class="middle full-width">Creating game...</div>
 
 @code {
-    protected override async void OnAfterRender(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
         // Delay the game creation randomly to prevent spam creating games
-        await Task.Delay((int)Random.Shared.NextInt64(1300, 1700));
+        //await Task.Delay((int)Random.Shared.NextInt64(1300, 1700));
         
         var playerId = playerIdAccessor.GetPlayerId();
         gamesService.TryCreateGame(playerId, out var game);

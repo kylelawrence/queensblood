@@ -1,0 +1,26 @@
+.field-card {
+    border: solid 4px silver;
+    border-radius: 10px;
+    position: relative;
+    background: #338;
+}
+
+.field-card .value {
+    position: absolute;
+    right: 3%;
+    top: 3%;
+    color: gold;
+    border: solid 3px gold;
+    border-radius: 50%;
+    font-weight: bold;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    height: 30px;
+    font-size: 16px;
+    padding-top: 2px;
+}
+
+.opponent {
+    background: firebrick;
+}

@@ -12,14 +12,33 @@
         <div class="container">
             <div class="field-grid-container">
                 <div class="field-grid">
-                    @for (var i = 0; i < 3; i++)
+                    @foreach (var row in Game.Field.Rows)
                     {
-                        <div class="player1-row score cell">score</div>
-                        @for (var j = 0; j < 5; j++)
+                        <div class="score cell">@GetRowScore(row)</div>
+                        @foreach (var cell in row.GetCells(CurrentPlayerType))
                         {
-                            <div class="field-card cell">card</div>
+                            var cellClass = $"cell c{row.RowIndex}{cell.ColumnIndex}";
+                            var isOpponent = cell.Owner != CurrentPlayerType;
+                            var opponentClass = this.MaybeClass("opponent", isOpponent);
+                            if (cell.Owner == PlayerType.Undecided) opponentClass = "";
+
+                            if (cell.CardId == -1)
+                            {
+                                var onClick = () => HandleFieldClick(cell);
+                                <button type="button" class="@cellClass @opponentClass" @onclick="onClick">
+                                    @for (var i = 0; i < cell.Pins; i++)
+                                    {
+                                        <span>!</span>
+                                    }
+                                </button>
+                            }
+                            else
+                            {
+                                var card = Cards.At(cell.CardId);
+                                <FieldCardView CardModel="@card" IsOpponent="@isOpponent" />
+                            }
                         }
-                        <div class="player2-row score cell">score</div>
+                        <div class="score cell">@GetOpponentRowScore(row)</div>
                     }
                 </div>
             </div>
@@ -50,7 +69,23 @@
                 <div class="middle mulligan-label">
                     <div>Mulligan - Pick cards to redraw</div>
                 </div>
-                <button type="button" class="mulligan-button" @onclick="HandleMulligan">Replace cards</button>
+                <button type="button" class="mulligan-button" @onclick="HandleMulligan">Redraw cards and start game</button>
+            }
+        }
+        else if (Game.State == GameState.Playing)
+        {
+            if (CurrentPlayerType == Game.PlayerTurn)
+            {
+                <div class="turn-label">
+                    <div>Your turn</div>
+                    <button type="button" class="skip-button" @onclick="HandleSkip">@(skipClicked ? "Confirm?" : "Skip turn")</button>
+                </div>
+            }
+            else
+            {
+                <div class="turn-label">
+                    Opponent's turn
+                </div>
             }
         }
     }
@@ -63,6 +98,18 @@
     private List<int> Hand = [];
     private List<int> IndexesSelectedForMulligan = [];
     private int CurrentSelectedIndex = -1;
+
+    private bool skipClicked = false;
+
+    private string GetRowScore(FieldRow row) {
+        int score = CurrentPlayerType == PlayerType.Player2 ? row.Player2Score : row.Player1Score;
+        return score > 0 ? score.ToString() : "";
+    }
+
+    private string GetOpponentRowScore(FieldRow row) {
+        int score = CurrentPlayerType == PlayerType.Player2 ? row.Player1Score : row.Player2Score;
+        return score > 0 ? score.ToString() : "";
+    }
 
     private bool HasMulliganed
     {
@@ -81,6 +128,8 @@
 
     private void HandleCardClick(int index)
     {
+        skipClicked = false;
+
         if (Game.State == GameState.Mulligan && !HasMulliganed)
         {
             if (IndexesSelectedForMulligan.Contains(index))
@@ -92,14 +141,52 @@
                 IndexesSelectedForMulligan.Add(index);
             }
         }
+        else if (Game.State == GameState.Playing && CurrentPlayerType == Game.PlayerTurn)
+        {
+            if (CurrentSelectedIndex == index)
+            {
+                CurrentSelectedIndex = -1;
+            }
+            else
+            {
+                CurrentSelectedIndex = index;
+            }
+        }
+        
         StateHasChanged();
     }
 
     private void HandleMulligan()
     {
         if (HasMulliganed) return;
-        Game.Mulligan(CurrentPlayerId, IndexesSelectedForMulligan);
+
+        var indexes = IndexesSelectedForMulligan.ToList();
         IndexesSelectedForMulligan.Clear();
-        StateHasChanged();
+        Game.Mulligan(CurrentPlayerId, indexes);
+    }
+
+    private void HandleFieldClick(FieldCell cell)
+    {
+        skipClicked = false;
+
+        if (Game.State != GameState.Playing) return;
+        if (CurrentPlayerType != Game.PlayerTurn) return;
+        if (CurrentSelectedIndex == -1) return;
+        
+        var selectedIndex = CurrentSelectedIndex;
+        CurrentSelectedIndex = -1;
+        Game.PlayCard(CurrentPlayerId, selectedIndex, cell);
+    }
+
+    private void HandleSkip()
+    {
+        if (!skipClicked)
+        {
+            skipClicked = true;
+            StateHasChanged();
+            return;
+        }
+
+        Game.SkipTurn(CurrentPlayerId);
     }
 }

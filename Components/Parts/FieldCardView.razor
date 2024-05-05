@@ -1,0 +1,8 @@
+<div class="field-card @(this.MaybeClass("opponent", IsOpponent))">
+    <div class="value">@CardModel.Value</div>
+</div>
+
+@code {
+    [Parameter] public Card CardModel { get; set; } = Card.Null;
+    [Parameter] public bool IsOpponent { get; set; } = false;
+}

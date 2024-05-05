@@ -28,10 +28,19 @@
     display: grid;
     grid-template-columns: repeat(7, 100px);
     grid-template-rows: repeat(3, 160px);
+    border: solid 8px silver;
 }
 
 .cell {
-    border: solid 1px silver;
+    all: unset;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    color: royalblue;
+}
+
+.cell.opponent {
+    color: red;
 }
 
 .mulligan-label {
@@ -55,16 +64,45 @@
     background: gold;
     color: #222;
     width: 200px;
-    height: 35px;
+    height: 60px;
     font-weight: bold;
     border-radius: 10px;
     border: solid 3px silver;
 }
 
-.score {}
+.field-card {
+    background: #444;
+}
 
-.player1-row.score {}
+.c00,
+.c02,
+.c04,
+.c11,
+.c13,
+.c20,
+.c22,
+.c24 {
+    background: gainsboro;
+}
 
-.player2-row.score {}
+.score {
+    border: solid 4px #222;
+    box-shadow: 1px 1px 5px #111 inset;
+    display: grid;
+    place-items: center;
+    color: silver;
+}
 
-.field-cell {}
+.turn-label {
+    position: fixed;
+    right: 10%;
+    bottom: 10%;
+}
+
+.skip-button {
+    margin-top: 5px;
+    background: darkred;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+}

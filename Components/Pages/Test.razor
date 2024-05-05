@@ -1,54 +1,10 @@
 @page "/test"
-@inherits DisposableComponent
-@inject TestService test
-@inject IJSRuntime js
-@inject CircuitHandler circuitHandler
 
 <PageTitle>Test</PageTitle>
 
 <div>
-    <h3>Events Called: @test.Derps</h3>
-    <buton type="button" @onclick="HandleClick">Do it!</buton>
+    
 </div>
 
 @code {
-    protected override void OnAfterRender(bool firstRender)
-    {
-        if (firstRender)
-        {
-            test.Derp -= Test_Derp;
-            test.Derp += Test_Derp;
-        }
-    }
-
-    private void HandleClick()
-    {
-        test.Do();
-    }
-
-    public new void Dispose()
-    {
-        test.Derp -= Test_Derp;
-    }
-
-    private void Test_Derp(object? sender, EventArgs e)
-    {
-        if (!circuitHandler.IsConnected())
-        {
-            test.Derp -= Test_Derp;
-            return;
-        }
-
-        InvokeAsync(() =>
-        {
-            try
-            {
-                StateHasChanged();
-            }
-            catch
-            {
-                test.Derp -= Test_Derp;
-            }
-        });
-    }
 }

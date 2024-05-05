@@ -4,8 +4,7 @@ public enum GameState
 {
     PickingDecks,
     Mulligan,
-    Player1Turn,
-    Player2Turn,
+    Playing,
     GameOver,
 }
 
@@ -36,6 +35,10 @@ public class Game(string id, string player1Id)
 
     public GameState State { get; private set; } = GameState.PickingDecks;
 
+    public PlayerType PlayerTurn { get; private set; } = PlayerType.Undecided;
+
+    private readonly Random random = new();
+
     private readonly string player1Id = player1Id;
     private string player2Id = "";
 
@@ -49,8 +52,9 @@ public class Game(string id, string player1Id)
     private List<int> player2Deck = [];
     private List<int> player1Hand = [];
     private List<int> player2Hand = [];
+    public Field Field { get; } = new();
 
-    private readonly Random random = new();
+    private bool playerHasSkipped = false;
 
     public bool IsActive
     {
@@ -75,7 +79,7 @@ public class Game(string id, string player1Id)
             player2Id = playerId;
             return PlayerType.Player2;
         }
-        
+
         return PlayerType.Spectator;
     }
 
@@ -120,7 +124,95 @@ public class Game(string id, string player1Id)
 
         if (Player1Mulliganed && Player2Mulliganed)
         {
-            State = random.Next(2) == 0 ? GameState.Player1Turn : GameState.Player2Turn;
+            State = GameState.Playing;
+            PlayerTurn = random.Next(2) == 0 ? PlayerType.Player1 : PlayerType.Player2;
+        }
+
+        OnGameUpdated(this, EventArgs.Empty);
+    }
+
+    public void PlayCard(string playerId, int handIndex, FieldCell cell)
+    {
+        var playerType = GetPlayerType(playerId);
+
+        if (State != GameState.Playing) return;
+        if (cell.CardId != -1) return;
+        if (PlayerTurn != playerType) return;
+        if (cell.Owner != playerType) return;
+
+        var hand = playerId == player1Id ? player1Hand : player2Hand;
+        if (handIndex < 0 || handIndex >= hand.Count) return;
+
+        var cardId = hand[handIndex];
+        var card = Cards.At(cardId);
+        if (card == Card.Null) return;
+        if (card.PinCost > cell.Pins) return;
+
+        cell.CardId = cardId;
+        hand.RemoveAt(handIndex);
+
+        // Boost the pins
+        for (var i = 0; i < Values.BOOST_COUNT; i++)
+        {
+            if (card.FieldIsBoosted(i))
+            {
+                var columnIndex = playerType == PlayerType.Player1 ? cell.ColumnIndex : Values.LAST_COL_INDEX - cell.ColumnIndex;
+
+                // Use the offsets to get the target row and column
+                var boostRow = cell.RowIndex + Boosts.GetRowOffset(i);
+                var boostColumn = columnIndex + Boosts.GetColumnOffset(i);
+
+                // Skip if the target is out of bounds
+                if (boostRow < 0 || boostRow >= Values.ROWS || boostColumn < 0 || boostColumn >= Values.COLUMNS) continue;
+
+                // Get the target cell
+                var row = Field.Rows[boostRow];
+                var cells = row.GetCells(playerType);
+                var cellToBoost = cells[boostColumn];
+
+                // Skip if the target cell is already occupied
+                if (cellToBoost.CardId != -1) continue;
+
+                // Boost the pins and set the owner
+                cellToBoost.Pins = Math.Min(cellToBoost.Pins + 1, Values.MAX_PINS);
+                cellToBoost.Owner = playerType;
+            }
+        }
+
+        ChangeTurnAndDraw();
+    }
+
+    public void SkipTurn(string playerId)
+    {
+        var playerType = GetPlayerType(playerId);
+
+        if (State != GameState.Playing) return;
+        if (PlayerTurn != playerType) return;
+        if (playerHasSkipped) {
+            // end game
+        }
+
+        playerHasSkipped = true;
+
+        ChangeTurnAndDraw();
+    }
+
+    private void ChangeTurnAndDraw()
+    {
+        playerHasSkipped = false;
+
+        LastUpdated = DateTime.Now;
+
+        PlayerTurn = PlayerTurn == PlayerType.Player1 ? PlayerType.Player2 : PlayerType.Player1;
+        if (PlayerTurn == PlayerType.Player1 && player1Deck.Count > 0)
+        {
+            player1Hand.Add(player1Deck[0]);
+            player1Deck.RemoveAt(0);
+        }
+        else if (PlayerTurn == PlayerType.Player2 && player2Deck.Count > 0)
+        {
+            player2Hand.Add(player2Deck[0]);
+            player2Deck.RemoveAt(0);
         }
 
         OnGameUpdated(this, EventArgs.Empty);
@@ -139,18 +231,20 @@ public class Game(string id, string player1Id)
 
         foreach (var card in deck.cards)
         {
+            // Add a card twice if it has a count of 2
             playerDeck.Add(card.index);
             if (card.count == 2) playerDeck.Add(card.index);
         }
 
         for (var i = playerDeck.Count - 1; i > 0; --i)
         {
+            // Swap the current card with a random card
             var j = random.Next(i + 1);
             (playerDeck[j], playerDeck[i]) = (playerDeck[i], playerDeck[j]);
         }
 
-        playerHand = [.. playerDeck.Take(5)];
-        playerDeck.RemoveRange(0, 5);
+        playerHand = [.. playerDeck.Take(Values.HAND_SIZE)];
+        playerDeck.RemoveRange(0, Values.HAND_SIZE);
     }
 
     private static void PullAndReplaceCards(List<int> hand, List<int> deck, List<int> indices)
@@ -164,5 +258,12 @@ public class Game(string id, string player1Id)
             deck.RemoveAt(0);
             deck.Add(card);
         }
+    }
+
+    private PlayerType GetPlayerType(string playerId)
+    {
+        if (playerId == player1Id) return PlayerType.Player1;
+        if (playerId == player2Id) return PlayerType.Player2;
+        return PlayerType.Spectator;
     }
 }
