@@ -60,17 +60,38 @@
         {
             @if (HasMulliganed)
             {
-                <div class="middle mulligan-label">
+                <div class="middle center-label">
                     <div>Waiting for other player...</div>
                 </div>
             }
             else
             {
-                <div class="middle mulligan-label">
+                <div class="middle center-label">
                     <div>Mulligan - Pick cards to redraw</div>
                 </div>
                 <button type="button" class="mulligan-button" @onclick="HandleMulligan">Redraw cards and start game</button>
             }
+        }
+        else if (Game.State == GameState.GameOver)
+        {
+            var winner = Game.GetWinner();
+            var label = "";
+            if (winner == PlayerType.Undecided)
+            {
+                label = "Draw";
+            }
+            else if (CurrentPlayerType == PlayerType.Spectator)
+            {
+                label = winner == PlayerType.Player1 ? "Left won" : "Right won";
+            }
+            else
+            {
+                label = winner == CurrentPlayerType ? "You won" : "You lost";
+            }
+
+            <div class="middle center-label">
+                <div>@label</div>
+            </div>
         }
         else if (Game.State == GameState.Playing)
         {

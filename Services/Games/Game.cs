@@ -188,18 +188,19 @@ public class Game(string id, string player1Id)
 
         if (State != GameState.Playing) return;
         if (PlayerTurn != playerType) return;
-        if (playerHasSkipped) {
-            // end game
+        if (playerHasSkipped)
+        {
+            State = GameState.GameOver;
+            OnGameUpdated(this, EventArgs.Empty);
+            return;
         }
 
-        playerHasSkipped = true;
-
-        ChangeTurnAndDraw();
+        ChangeTurnAndDraw(true);
     }
 
-    private void ChangeTurnAndDraw()
+    private void ChangeTurnAndDraw(bool fromSkip = false)
     {
-        playerHasSkipped = false;
+        playerHasSkipped = fromSkip;
 
         LastUpdated = DateTime.Now;
 
@@ -216,6 +217,30 @@ public class Game(string id, string player1Id)
         }
 
         OnGameUpdated(this, EventArgs.Empty);
+    }
+
+    public bool HasAvailableCellToPlay(string playerId)
+    {
+        var playerType = GetPlayerType(playerId);
+        if (playerType == PlayerType.Spectator || playerType == PlayerType.Undecided) return false;
+
+        var hand = playerId == player1Id ? player1Hand : player2Hand;
+
+        var maxPins = hand.MaxBy((cardId) => Cards.At(cardId).PinCost);
+        return Field.Rows.Any((row) => row.GetCells(playerType).Any((cell) => cell.CardId == -1 && cell.Pins >= maxPins));
+    }
+
+    public PlayerType GetWinner()
+    {
+        if (State != GameState.GameOver) return PlayerType.Undecided;
+
+        var player1Score = Field.Rows.Sum((row) => row.Player1Score);
+        var player2Score = Field.Rows.Sum((row) => row.Player2Score);
+
+        if (player1Score > player2Score) return PlayerType.Player1;
+        if (player2Score > player1Score) return PlayerType.Player2;
+        
+        return PlayerType.Undecided;
     }
 
     public List<int> GetHand(string playerId)
