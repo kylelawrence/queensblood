@@ -23,6 +23,8 @@ public enum GameEventType
 
 public class Game(string id, string player1Id)
 {
+    public int Round { get; private set; } = 1;
+
     public static readonly Game None = new("", "");
 
     public event EventHandler OnGameUpdated = delegate { };
@@ -205,6 +207,15 @@ public class Game(string id, string player1Id)
         LastUpdated = DateTime.Now;
 
         PlayerTurn = PlayerTurn == PlayerType.Player1 ? PlayerType.Player2 : PlayerType.Player1;
+        Round++;
+        
+        // Don't draw for first round
+        if (Round == 2)
+        {
+            OnGameUpdated(this, EventArgs.Empty);
+            return;
+        }
+
         if (PlayerTurn == PlayerType.Player1 && player1Deck.Count > 0)
         {
             player1Hand.Add(player1Deck[0]);
@@ -222,11 +233,11 @@ public class Game(string id, string player1Id)
     public bool HasAvailableCellToPlay(string playerId)
     {
         var playerType = GetPlayerType(playerId);
-        if (playerType == PlayerType.Spectator || playerType == PlayerType.Undecided) return false;
+        if (playerType == PlayerType.Spectator || playerType == PlayerType.Undecided) return true;
 
         var hand = playerId == player1Id ? player1Hand : player2Hand;
 
-        var maxPins = hand.MaxBy((cardId) => Cards.At(cardId).PinCost);
+        var maxPins = hand.Min((cardId) => Cards.At(cardId).PinCost);
         return Field.Rows.Any((row) => row.GetCells(playerType).Any((cell) => cell.CardId == -1 && cell.Pins >= maxPins));
     }
 

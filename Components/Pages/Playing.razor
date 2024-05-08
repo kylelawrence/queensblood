@@ -101,6 +101,12 @@
                     <div>Your turn</div>
                     <button type="button" class="skip-button" @onclick="HandleSkip">@(skipClicked ? "Confirm?" : "Skip turn")</button>
                 </div>
+                if (!Game.HasAvailableCellToPlay(CurrentPlayerId))
+                {
+                    <div class="middle center-label">
+                        <div>You have no cards you can play. Please skip.</div>
+                    </div>
+                }
             }
             else
             {
