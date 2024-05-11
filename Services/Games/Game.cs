@@ -56,16 +56,19 @@ public class Game(string id, string player1Id)
     private List<int> player2Hand = [];
     public Field Field { get; } = new();
 
-    private bool playerHasSkipped = false;
+    public bool PlayerHasSkipped = false;
+
+    public PlayerType Winner { get; private set; } = PlayerType.Undecided;
 
     public bool IsActive
     {
         get
         {
             var hasId = !string.IsNullOrWhiteSpace(Id);
+            var notGameOver = State != GameState.GameOver;
             var withinHour = DateTime.Now.Subtract(TimeSpan.FromHours(1)) < Created;
             var updatedRecently = DateTime.Now.Subtract(TimeSpan.FromMinutes(15)) < LastUpdated;
-            var isActive = hasId && withinHour && updatedRecently;
+            var isActive = hasId && notGameOver && withinHour && updatedRecently;
             return isActive;
         }
     }
@@ -190,9 +193,10 @@ public class Game(string id, string player1Id)
 
         if (State != GameState.Playing) return;
         if (PlayerTurn != playerType) return;
-        if (playerHasSkipped)
+        if (PlayerHasSkipped)
         {
             State = GameState.GameOver;
+            Winner = GetWinner();
             OnGameUpdated(this, EventArgs.Empty);
             return;
         }
@@ -200,9 +204,19 @@ public class Game(string id, string player1Id)
         ChangeTurnAndDraw(true);
     }
 
+    public void Forfeit(string playerId)
+    {
+        if (State == GameState.GameOver) return;
+
+        var playerType = GetPlayerType(playerId);
+        Winner = playerType == PlayerType.Player1 ? PlayerType.Player2 : PlayerType.Player1;
+        State = GameState.GameOver;
+        OnGameUpdated(this, EventArgs.Empty);
+    }
+
     private void ChangeTurnAndDraw(bool fromSkip = false)
     {
-        playerHasSkipped = fromSkip;
+        PlayerHasSkipped = fromSkip;
 
         LastUpdated = DateTime.Now;
 
@@ -241,10 +255,8 @@ public class Game(string id, string player1Id)
         return Field.Rows.Any((row) => row.GetCells(playerType).Any((cell) => cell.CardId == -1 && cell.Pins >= maxPins));
     }
 
-    public PlayerType GetWinner()
+    private PlayerType GetWinner()
     {
-        if (State != GameState.GameOver) return PlayerType.Undecided;
-
         var player1Score = Field.Rows.Sum((row) => row.Player1Score);
         var player2Score = Field.Rows.Sum((row) => row.Player2Score);
 

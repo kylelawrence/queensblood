@@ -101,12 +101,36 @@
     position: fixed;
     right: 10%;
     bottom: 10%;
+    text-align: center;
+}
+
+.turn-label div {
+    text-align: center;
 }
 
 .skip-button {
     margin-top: 5px;
-    background: darkred;
+    background: gold;
+    color: black;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.forfeit-button {
+    all: unset;
+    position:absolute;
+    opacity: .4;
+    top: 20px;
+    right: 20px;
+    outline: none;
+    margin-top: 5px;
+    background: red;
     color: white;
     border-radius: 5px;
     padding: 10px;
+    cursor: pointer;
+}
+
+.forfeit-button:hover {
+    opacity: 1;
 }

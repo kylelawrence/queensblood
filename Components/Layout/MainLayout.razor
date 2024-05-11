@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 
 <div class="body-box">
     @Body
+    <button type="button" class="home" @onclick="HandleHomeClick">🏠</button>
 </div>
 
 <div id="blazor-error-ui">
@@ -9,3 +11,10 @@
     <a href="" class="reload">Reload</a>
     <a class="dismiss">🗙</a>
 </div>
+
+@code {
+    private void HandleHomeClick()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

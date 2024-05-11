@@ -2,6 +2,7 @@
 @inject IPlayerIdAccessor playerIdAccessor
 @inject IGamesService gamesService
 @inject IHttpContextAccessor contextAccessor
+@inject NavigationManager navigationManager
 
 @using RNG = System.Security.Cryptography.RandomNumberGenerator
 
@@ -14,7 +15,7 @@
         @if (existingGame.IsActive)
         {
             <a href="/play/@(existingGame.Id)" class="mainlink">Continue game @(existingGame.Id)</a>
-            <a href="/forfeit" class="forfeit"><span>-&gt;</span> forfeit and start new <span>&lt;-</span></a>
+            <button class="forfeit" type="button" @onclick="HandleForfeitClick"><span>-&gt;</span> forfeit and start new <span>&lt;-</span></button>
         }
         else
         {
@@ -32,5 +33,12 @@
     {
         playerId = playerIdAccessor.GetPlayerId();
         existingGame = gamesService.FindGameByPlayerId(playerId);
+    }
+
+    private void HandleForfeitClick()
+    {
+        existingGame.Forfeit(playerId);
+        existingGame = Game.None;
+        navigationManager.NavigateTo("/play");
     }
 }

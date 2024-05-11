@@ -1,4 +1,5 @@
 @inherits GameWatcher
+@inject NavigationManager navigationManager
 
 <div style="flex-grow: 1; display: flex;">
     @if (Game.State == GameState.PickingDecks)
@@ -74,7 +75,7 @@
         }
         else if (Game.State == GameState.GameOver)
         {
-            var winner = Game.GetWinner();
+            var winner = Game.Winner;
             var label = "";
             if (winner == PlayerType.Undecided)
             {
@@ -99,6 +100,11 @@
             {
                 <div class="turn-label">
                     <div>Your turn</div>
+                    @if(Game.PlayerHasSkipped)
+                    {
+                       <div>Your opponent has skipped.</div>
+                       <div>If you skip, the game will end.</div> 
+                    }
                     <button type="button" class="skip-button" @onclick="HandleSkip">@(skipClicked ? "Confirm?" : "Skip turn")</button>
                 </div>
                 if (!Game.HasAvailableCellToPlay(CurrentPlayerId))
@@ -116,6 +122,10 @@
             }
         }
     }
+    @if (Game.State != GameState.GameOver)
+    {
+        <button type="button" class="forfeit-button" @onclick="HandleForfeitClick">@(forfeitClicked ? "Confirm?" : "Forfeit")</button>
+    }
 </div>
 
 @code {
@@ -127,6 +137,7 @@
     private int CurrentSelectedIndex = -1;
 
     private bool skipClicked = false;
+    private bool forfeitClicked = false;
 
     private string GetRowScore(FieldRow row) {
         int score = CurrentPlayerType == PlayerType.Player2 ? row.Player2Score : row.Player1Score;
@@ -215,5 +226,18 @@
         }
 
         Game.SkipTurn(CurrentPlayerId);
+    }
+
+    private void HandleForfeitClick()
+    {
+        if (!forfeitClicked)
+        {
+            forfeitClicked = true;
+            StateHasChanged();
+            return;
+        }
+
+        Game.Forfeit(CurrentPlayerId);
+        navigationManager.NavigateTo("/");
     }
 }
