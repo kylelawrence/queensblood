@@ -2,12 +2,37 @@ using RNG = System.Security.Cryptography.RandomNumberGenerator;
 
 namespace queensblood;
 
-public class GamesMemService : IGamesService
+public class GamesMemService : IGamesService, IDisposable
 {
-    private static string GetNewId() => RNG.GetHexString(6);
+    private static string GetNewId() => RNG.GetHexString(Values.GAME_ID_LENGTH);
 
     private readonly Dictionary<string, Game> gamesById = [];
     private readonly Dictionary<string, Game> gamesByPlayerId = [];
+    private readonly Timer? cleanUpTimer = null;
+
+    public GamesMemService()
+    {
+        cleanUpTimer = new Timer(
+            CleanUpGames,
+            null,
+            TimeSpan.FromMinutes(Values.CLEANUP_INTERVAL),
+            TimeSpan.FromMinutes(Values.CLEANUP_INTERVAL)
+        );
+    }
+
+    private void CleanUpGames(object? state)
+    {
+        var keys = gamesByPlayerId.Keys;
+        foreach (var key in keys)
+        {
+            var game = gamesByPlayerId[key];
+            if (!game.IsActive)
+            {
+                gamesByPlayerId.Remove(key);
+                gamesById.Remove(game.Id);
+            }
+        }
+    }
 
     public bool TryCreateGame(string playerId, out Game game)
     {
@@ -37,5 +62,11 @@ public class GamesMemService : IGamesService
     public Game FindGameById(string gameId)
     {
         return gamesById.TryGetValue(gameId, out var game) ? game : Game.None;
+    }
+
+    public void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        cleanUpTimer?.Dispose();
     }
 }

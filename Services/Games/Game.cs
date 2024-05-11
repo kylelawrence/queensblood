@@ -60,18 +60,7 @@ public class Game(string id, string player1Id)
 
     public PlayerType Winner { get; private set; } = PlayerType.Undecided;
 
-    public bool IsActive
-    {
-        get
-        {
-            var hasId = !string.IsNullOrWhiteSpace(Id);
-            var notGameOver = State != GameState.GameOver;
-            var withinHour = DateTime.Now.Subtract(TimeSpan.FromHours(1)) < Created;
-            var updatedRecently = DateTime.Now.Subtract(TimeSpan.FromMinutes(15)) < LastUpdated;
-            var isActive = hasId && notGameOver && withinHour && updatedRecently;
-            return isActive;
-        }
-    }
+    public bool IsActive => Id != "" && DateTime.Now.Subtract(TimeSpan.FromMinutes(Values.ACTIVE_MINUTES)) < LastUpdated;
 
     public PlayerType Join(string playerId)
     {
@@ -222,7 +211,7 @@ public class Game(string id, string player1Id)
 
         PlayerTurn = PlayerTurn == PlayerType.Player1 ? PlayerType.Player2 : PlayerType.Player1;
         Round++;
-        
+
         // Don't draw for first round
         if (Round == 2)
         {
@@ -262,7 +251,7 @@ public class Game(string id, string player1Id)
 
         if (player1Score > player2Score) return PlayerType.Player1;
         if (player2Score > player1Score) return PlayerType.Player2;
-        
+
         return PlayerType.Undecided;
     }
 
