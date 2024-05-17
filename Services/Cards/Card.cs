@@ -1,9 +1,9 @@
 namespace queensblood;
 
-public record Card(string Name, int PinCost, int Value, int Boosts)
+public record Card(string Name, int PinCost, int Value, int Boosts, Ability Ability)
 {
-    public static readonly Card Null = new("", 0, 0, 0);
-    public static readonly Card New = new("Name", 1, 1, 0);
+    public static readonly Card Null = new("", 0, 0, 0, Ability.None);
+    public static readonly Card New = new("Name", 1, 1, 0, Ability.None);
 
     public override string ToString()
     {
@@ -17,5 +17,12 @@ public record Card(string Name, int PinCost, int Value, int Boosts)
     {
         if (index < 0 || index > 24 || index == 12) return false;
         return (Boosts & fieldValues[index]) != 0;
+    }
+
+    public Card ToggleBoost(int index)
+    {
+        if (index < 0 || index > 24 || index == 12) return this;
+        var newBoosts = Boosts ^ fieldValues[index];
+        return new(Name, PinCost, Value, newBoosts, Ability.None);
     }
 }

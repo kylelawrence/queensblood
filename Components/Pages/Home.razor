@@ -12,7 +12,7 @@
     <h1></h1>
     <h1 class="title">Queen&#39;s Blood</h1>
     <div class="controls-container">
-        @if (existingGame.IsActive)
+        @if (existingGame.IsActive && existingGame.State != GameState.GameOver)
         {
             <a href="/play/@(existingGame.Id)" class="mainlink">Continue game @(existingGame.Id)</a>
             <button class="forfeit" type="button" @onclick="HandleForfeitClick"><span>-&gt;</span> forfeit and start new <span>&lt;-</span></button>

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.JSInterop;
 
 namespace queensblood;
@@ -9,28 +10,34 @@ namespace queensblood;
 /// <param name="js">JS Interop dependency</param>
 public class DecksLocalService(IJSRuntime js) : IDecksService
 {
-    private const string SAVE_DECK_FN = "saveDeck";
-    private const string LOAD_DECK_FN = "loadDeck";
-    private const string SELECTED_DECK_FN = "getSelectedDeck";
+    private const string GET_ITEM = "localStorage.getItem";
+    private const string SET_ITEM = "localStorage.setItem";
+    private const string SELECTED_DECK_KEY = "selected_deck";
 
     private readonly IJSRuntime js = js;
 
     public async Task SaveDeck(int index, DeckCard[] cards)
     {
-        var deck = new Deck(cards);
-        await js.InvokeVoidAsync(SAVE_DECK_FN, index, deck).Try();
+        var json = JsonSerializer.Serialize(new Deck(cards));
+        await js.InvokeVoidAsync(SET_ITEM, $"deck{index}", json).Try();
     }
 
     public async Task<Deck> LoadDeck(int index)
     {
-        var result = await js.InvokeAsync<Deck>(LOAD_DECK_FN, index).Try();
-        return result.Success ? result.Value : new([]);
+        var response = await js.InvokeAsync<string>(GET_ITEM, $"deck{index}").Try();
+        if (!response.Success || response.Value == null)
+            return index == 0 ? Deck.BuildDefault() : Deck.None;
+
+        var deck = JsonSerializer.Deserialize<Deck>(response.Value);
+        await js.InvokeVoidAsync(SET_ITEM, SELECTED_DECK_KEY, index.ToString()).Try();
+
+        return deck ?? Deck.BuildDefault();
     }
 
     public async Task<int> GetSelectedDeck()
     {
-        var result = await js.InvokeAsync<string>(SELECTED_DECK_FN).Try();
-        if (!result.Success) return 0;
-        return int.TryParse(result.Value, out var selectedDeck) ? selectedDeck : 0;
+        var response = await js.InvokeAsync<string>(GET_ITEM, SELECTED_DECK_KEY).Try();
+        if (!response.Success) return 0;
+        return int.TryParse(response.Value, out var selectedDeck) ? selectedDeck : 0;
     }
 }

@@ -12,6 +12,15 @@ public record Deck(DeckCard[] cards)
 
     public static readonly Deck None = new([]);
 
+    public static Deck BuildDefault()
+    {
+        var cards = new DeckCard[] {
+            new(0, 2), new(1, 2), new(2, 2), new(3, 2),
+            new(4, 2), new(5, 2), new(6, 2), new(7, 1)
+        };
+        return new(cards);
+    }
+
     public bool IsValid
     {
         get

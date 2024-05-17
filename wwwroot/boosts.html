@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boosts editor</title>
+    <style>
+        body {
+            display: grid;
+            place-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #333;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #boosts {
+            width: 80%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 3px solid #ccc;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .field {
+            display: grid;
+            grid-template-columns: repeat(5, 50px);
+            grid-gap: 10px;
+            margin: 0 auto;
+            border: 3px solid #ccc;
+            border-radius: 10px;
+            padding: 5px;
+        }
+
+        .cell {
+            height: 50px;
+            background: brown;
+            border-radius: 5px;
+            border: 0;
+            cursor: pointer;
+        }
+
+        .cell.active {
+            background-color: gold;
+        }
+
+        .cell[data-cell="12"] {
+            background: white;
+        }
+    </style>
+    <script>
+        let boostsValue = 0;
+        let boostsLabel;
+        const fieldValues = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216];
+
+        function toggleBoost(e) {
+            e.target.classList.toggle('active');
+            const cellValue = fieldValues[parseInt(e.target.dataset.cell)];
+            boostsValue = boostsValue ^ cellValue;
+            boostsLabel.value = boostsValue;
+        }
+
+        function bindCells() {
+            boostsLabel = document.getElementById('boosts');
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.addEventListener('click', toggleBoost);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', bindCells);
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <input type="text" id="boosts" value="0" readonly />
+        <div class="field">
+            <button type="button" class="cell" data-cell="0" />
+            <button type="button" class="cell" data-cell="1" />
+            <button type="button" class="cell" data-cell="2" />
+            <button type="button" class="cell" data-cell="3" />
+            <button type="button" class="cell" data-cell="4" />
+            <button type="button" class="cell" data-cell="5" />
+            <button type="button" class="cell" data-cell="6" />
+            <button type="button" class="cell" data-cell="7" />
+            <button type="button" class="cell" data-cell="8" />
+            <button type="button" class="cell" data-cell="9" />
+            <button type="button" class="cell" data-cell="10" />
+            <button type="button" class="cell" data-cell="11" />
+            <button type="button" class="cell" data-cell="12" />
+            <button type="button" class="cell" data-cell="13" />
+            <button type="button" class="cell" data-cell="14" />
+            <button type="button" class="cell" data-cell="15" />
+            <button type="button" class="cell" data-cell="16" />
+            <button type="button" class="cell" data-cell="17" />
+            <button type="button" class="cell" data-cell="18" />
+            <button type="button" class="cell" data-cell="19" />
+            <button type="button" class="cell" data-cell="20" />
+            <button type="button" class="cell" data-cell="21" />
+            <button type="button" class="cell" data-cell="22" />
+            <button type="button" class="cell" data-cell="23" />
+            <button type="button" class="cell" data-cell="24" />
+        </div>
+    </div>
+</body>
+
+</html>

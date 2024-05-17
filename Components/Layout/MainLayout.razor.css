@@ -38,4 +38,7 @@
 	width: 35px;
 	height: 35px;
 	background: #333;
+	display: grid;
+	align-items: center;
+	line-height: 18px;
 }
