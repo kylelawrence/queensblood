@@ -2,13 +2,6 @@ using Microsoft.AspNetCore.Components.Server.Circuits;
 using queensblood;
 using queensblood.Components;
 
-// using MongoDB.Driver;
-
-// var dbConnect = Environment.GetEnvironmentVariable("COSMOS_CONNECTION_STRING");
-// var dbClient = new MongoClient(dbConnect);
-// .AddSingleton(dbClient.GetDatabase("queensblood"))
-// .AddSingleton<ICardSetService, CardSetMongoService>() // Obselete
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
