@@ -30,7 +30,7 @@ public static class Cards
     public static Card At(int index) 
     {
         if (index < 0 || index >= cards.Length) return Card.Null;
-        return cards[index];
+        return cards[index].Clone();
     }
 
     public static readonly int Count = cards.Length;

@@ -54,6 +54,7 @@ public class Game(string id, string player1Id)
     private List<int> player2Deck = [];
     private List<int> player1Hand = [];
     private List<int> player2Hand = [];
+    private List<FieldCell> cellsWithAbilities = [];
     public Field Field { get; } = new();
 
     public bool PlayerHasSkipped = false;
@@ -129,51 +130,87 @@ public class Game(string id, string player1Id)
     {
         var playerType = GetPlayerType(playerId);
 
-        if (State != GameState.Playing) return;
-        if (cell.CardId != -1) return;
-        if (PlayerTurn != playerType) return;
-        if (cell.Owner != playerType) return;
+        var validCell = State == GameState.Playing && cell.Card == Card.Null && PlayerTurn == playerType && cell.Owner == playerType;
+        if (!validCell) return;
 
         var hand = playerId == player1Id ? player1Hand : player2Hand;
         if (handIndex < 0 || handIndex >= hand.Count) return;
 
         var cardId = hand[handIndex];
         var card = Cards.At(cardId);
-        if (card == Card.Null) return;
-        if (card.PinCost > cell.Pins) return;
+        if (card == Card.Null || card.PinCost > cell.Pins) return;
 
-        cell.CardId = cardId;
+        cell.Card = card;
         hand.RemoveAt(handIndex);
 
         // Boost the pins
-        for (var i = 0; i < Values.BOOST_COUNT; i++)
+        ActionOnField(playerType, cell, card.Boosts, (cell) =>
         {
-            if (card.FieldIsBoosted(i))
-            {
-                var columnIndex = playerType == PlayerType.Player1 ? cell.ColumnIndex : Values.LAST_COL_INDEX - cell.ColumnIndex;
+            if (cell.Card != Card.Null) return;
+            cell.Pins = Math.Min(cell.Pins + 1, Values.MAX_PINS);
+            cell.Owner = playerType;
+        });
 
-                // Use the offsets to get the target row and column
-                var boostRow = cell.RowIndex + Boosts.GetRowOffset(i);
-                var boostColumn = columnIndex + Boosts.GetColumnOffset(i);
-
-                // Skip if the target is out of bounds
-                if (boostRow < 0 || boostRow >= Values.ROWS || boostColumn < 0 || boostColumn >= Values.COLUMNS) continue;
-
-                // Get the target cell
-                var row = Field.Rows[boostRow];
-                var cells = row.GetCells(playerType);
-                var cellToBoost = cells[boostColumn];
-
-                // Skip if the target cell is already occupied
-                if (cellToBoost.CardId != -1) continue;
-
-                // Boost the pins and set the owner
-                cellToBoost.Pins = Math.Min(cellToBoost.Pins + 1, Values.MAX_PINS);
-                cellToBoost.Owner = playerType;
-            }
+        if (card.Ability.Trigger == Trigger.Played)
+        {
+            TriggerAbility(playerType, cell, card);
+        }
+        else if (card.Ability.Trigger != Trigger.None)
+        {
+            cellsWithAbilities.Add(cell);
         }
 
         ChangeTurnAndDraw();
+    }
+
+    public void ActionOnField(PlayerType playerType, FieldCell cell, int cardField, Action<FieldCell> action)
+    {
+        for (var i = 0; i < Values.BOOST_COUNT; i++)
+        {
+            if (Card.FieldIsMarked(cardField, i))
+            {
+                // Get the correct column based on the player (from left or right)
+                var columnIndex = playerType == PlayerType.Player1 ? cell.ColumnIndex : Values.LAST_COL_INDEX - cell.ColumnIndex;
+
+                // Use the offsets to get the target row and column
+                var targetRowIndex = cell.RowIndex + Boosts.GetRowOffset(i);
+                var targetRowColumn = columnIndex + Boosts.GetColumnOffset(i);
+
+                // Skip if the target is out of bounds
+                if (targetRowIndex < 0 || targetRowIndex >= Values.ROWS || targetRowColumn < 0 || targetRowColumn >= Values.COLUMNS) continue;
+
+                // Get the target cell
+                var targetRow = Field.Rows[targetRowIndex];
+                var targetRowCells = targetRow.GetCells(playerType);
+                var targetCell = targetRowCells[targetRowColumn];
+
+                // Action on the cell
+                action(targetCell);
+            }
+        }
+    }
+
+    private void TriggerAbilities(PlayerType playerType, Trigger trigger)
+    {
+        foreach (var cell in cellsWithAbilities)
+        {
+            if (cell.Card.Ability.Trigger == trigger) TriggerAbility(playerType, cell, cell.Card);
+        }
+    }
+
+    private void TriggerAbility(PlayerType playerType, FieldCell cell, Card sourceCard)
+    {
+        switch (sourceCard.Ability.Effect)
+        {
+            case Effect.Lower:
+                ActionOnField(playerType, cell, sourceCard.Ability.Field, (cell) =>
+                {
+                    if (cell.Card == Card.Null) return;
+                    cell.Card.Value = Math.Max(cell.Card.Value - sourceCard.Ability.Value, 0);
+                    if (cell.Card.Value == 0) cell.Card = Card.Null;
+                });
+                break;
+        }
     }
 
     public void SkipTurn(string playerId)
@@ -241,7 +278,7 @@ public class Game(string id, string player1Id)
         var hand = playerId == player1Id ? player1Hand : player2Hand;
 
         var maxPins = hand.Min((cardId) => Cards.At(cardId).PinCost);
-        return Field.Rows.Any((row) => row.GetCells(playerType).Any((cell) => cell.CardId == -1 && cell.Pins >= maxPins));
+        return Field.Rows.Any((row) => row.GetCells(playerType).Any((cell) => cell.Card == Card.Null && cell.Pins >= maxPins));
     }
 
     private PlayerType GetWinner()

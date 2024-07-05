@@ -20,7 +20,8 @@
 
                 var middle = this.MaybeClass("field-middle", index == 12);
                 var boosted = this.MaybeClass("field-boosted", CardModel.FieldIsBoosted(index));
-                var classList = $"{middle} {boosted}";
+                var ability = this.MaybeClass("field-ability", CardModel.FieldHasAbility(index));
+                var classList = $"{middle} {boosted} {ability}";
 
                 <div class="@classList" @onclick="onClick"></div>
             }

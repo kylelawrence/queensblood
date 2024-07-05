@@ -1,9 +1,15 @@
 namespace queensblood;
 
-public record Card(string Name, int PinCost, int Value, int Boosts, Ability Ability)
+public class Card(string name, int pinCost, int value, int boosts, Ability ability)
 {
     public static readonly Card Null = new("", 0, 0, 0, Ability.None);
     public static readonly Card New = new("Name", 1, 1, 0, Ability.None);
+
+    public string Name { get; private set; } = name;
+    public int PinCost { get; private set; } = pinCost;
+    public int Value { get; set; } = value;
+    public int Boosts { get; private set; } = boosts;
+    public Ability Ability { get; private set; } = ability;
 
     public override string ToString()
     {
@@ -19,10 +25,27 @@ public record Card(string Name, int PinCost, int Value, int Boosts, Ability Abil
         return (Boosts & fieldValues[index]) != 0;
     }
 
+    public bool FieldHasAbility(int index)
+    {
+        if (index < 0 || index > 24 || index == 12) return false;
+        return (Ability.Field & fieldValues[index]) != 0;
+    }
+
+    public static bool FieldIsMarked(int marks, int index)
+    {
+        if (index < 0 || index > 24 || index == 12) return false;
+        return (marks & fieldValues[index]) != 0;
+    }
+
     public Card ToggleBoost(int index)
     {
         if (index < 0 || index > 24 || index == 12) return this;
         var newBoosts = Boosts ^ fieldValues[index];
         return new(Name, PinCost, Value, newBoosts, Ability.None);
+    }
+
+    public Card Clone()
+    {
+        return new(Name, PinCost, Value, Boosts, Ability);
     }
 }

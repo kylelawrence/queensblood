@@ -23,7 +23,7 @@
                             var opponentClass = this.MaybeClass("opponent", isOpponent);
                             if (cell.Owner == PlayerType.Undecided) opponentClass = "";
 
-                            if (cell.CardId == -1)
+                            if (cell.Card == Card.Null)
                             {
                                 var onClick = () => HandleFieldClick(cell);
                                 <button type="button" class="@cellClass @opponentClass" @onclick="onClick">
@@ -35,8 +35,7 @@
                             }
                             else
                             {
-                                var card = Cards.At(cell.CardId);
-                                <FieldCardView CardModel="@card" IsOpponent="@isOpponent" />
+                                <FieldCardView CardModel="@cell.Card" IsOpponent="@isOpponent" />
                             }
                         }
                         <div class="score cell">@GetOpponentRowScore(row)</div>

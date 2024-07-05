@@ -49,19 +49,20 @@
 
 .field {
     aspect-ratio: 1;
-    height: 35%;
     margin-bottom: 8%;
     border: solid 2px silver;
     border-radius: 8px;
     display: grid;
-    padding: 3%;
-    grid-template-columns: auto auto auto auto auto;
+    padding: 3px;
+    grid-template-columns: repeat(5, 10px);
     gap: 2px;
 }
 
 .field>div {
+    height: 10px;
     border-radius: 3px;
     background: #584839;
+    position: relative;
 }
 
 .field>div.field-boosted {
@@ -70,6 +71,14 @@
 
 .field>div.field-middle {
     background: #eee;
+}
+
+.field>div.field-ability::after {
+    content: " ";
+    position: absolute;
+    border: solid 2px red;
+    inset: 0;
+    border-radius: 3px;
 }
 
 .name {
