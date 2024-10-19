@@ -1,15 +1,13 @@
 namespace queensblood;
 
-public class Field
+public class Field(FieldRow[] rows)
 {
-    public FieldRow[] Rows { get; private set; }
+    public static readonly Field None = new([]);
 
-    public Field()
+    public FieldRow[] Rows { get; private set; } = rows;
+
+    public IEnumerable<FieldCell> GetOccupiedCells()
     {
-        Rows = [
-            new FieldRow(0), 
-            new FieldRow(1), 
-            new FieldRow(2), 
-        ];
+        return Rows.SelectMany((row) => row.GetOccupiedCells());
     }
 }

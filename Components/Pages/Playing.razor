@@ -13,21 +13,25 @@
         <div class="container">
             <div class="field-grid-container">
                 <div class="field-grid">
-                    @foreach (var row in Game.Field.Rows)
+                    @for (var ri = 0; ri < Field.Rows.Length; ri++)
                     {
+                        var rowIndex = ri;
+                        var row = Field.Rows[rowIndex];
                         <div class="score cell">@GetRowScore(row)</div>
-                        @foreach (var cell in row.GetCells(CurrentPlayerType))
+                        @for (var ci = 0; ci < row.Cells.Count; ci++)
                         {
-                            var cellClass = $"cell c{row.RowIndex}{cell.ColumnIndex}";
+                            var cellIndex = ci;
+                            var cell = row.Cells[cellIndex];
+                            var cellClass = $"cell c{rowIndex}{cellIndex}";
                             var isOpponent = cell.Owner != CurrentPlayerType;
                             var opponentClass = this.MaybeClass("opponent", isOpponent);
                             if (cell.Owner == PlayerType.Undecided) opponentClass = "";
 
-                            if (cell.Card == Card.Null)
+                            if (cell.Card == null)
                             {
-                                var onClick = () => HandleFieldClick(cell);
+                                var onClick = () => HandleFieldClick(rowIndex, cellIndex);
                                 <button type="button" class="@cellClass @opponentClass" @onclick="onClick">
-                                    @for (var i = 0; i < cell.Pins; i++)
+                                    @for (var pin = 0; pin < cell.Pins; pin++)
                                     {
                                         <span>!</span>
                                     }
@@ -131,6 +135,7 @@
     [Parameter] public string CurrentPlayerId { get; set; } = "";
     [Parameter] public PlayerType CurrentPlayerType { get; set; } = PlayerType.Undecided;
 
+    private Field Field = Field.None;
     private List<int> Hand = [];
     private List<int> IndexesSelectedForMulligan = [];
     private int CurrentSelectedIndex = -1;
@@ -160,6 +165,7 @@
     protected override void OnParametersSet()
     {
         Hand = Game.GetHand(CurrentPlayerId);
+        Field = Game.GetField(CurrentPlayerType);
     }
 
     private void HandleCardClick(int index)
@@ -201,7 +207,7 @@
         Game.Mulligan(CurrentPlayerId, indexes);
     }
 
-    private void HandleFieldClick(FieldCell cell)
+    private void HandleFieldClick(int rowIndex, int cellIndex)
     {
         skipClicked = false;
 
@@ -211,7 +217,7 @@
         
         var selectedIndex = CurrentSelectedIndex;
         CurrentSelectedIndex = -1;
-        Game.PlayCard(CurrentPlayerId, selectedIndex, cell);
+        Game.PlayCard(CurrentPlayerId, selectedIndex, rowIndex, cellIndex);
     }
 
     private void HandleSkip()

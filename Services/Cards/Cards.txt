@@ -1,0 +1,145 @@
+
+
+Played - enfeeble - enemy - 4
+
+
+Played - enfeeble - both - 3
+
+
+In play - enhance - ally - 1
+Played - add card to hand
+
+In play - enhance - ally - 3
+In play - enhance - ally - 2
+
+
+
+
+
+
+Played - enfeeble - enemy - 3
+
+Played - enfeeble - both - 3
+
+In play - enhance - ally - 3
+In play - enhance - ally - 2
+Played - enfeeble - both - 1
+In play - enfeeble - both - 1
+In play - enfeeble - both - 1
+Played - enfeeble - enemy - 3
+Destroyed - enfeeble - both - 3
+In play - enhance - ally - 2
+Ally played - enhance - self - 1
+In play - enhance - ally - 4
+Played - enfeeble - both - 2
+Ally destroyed - enhance - self - 2
+Destroyed - enhance - ally - 3
+Destroyed - enfeeble - both - 4
+Enemy played - enhance - self - 1
+Played - destroy - both
+Destroyed - add card to hand
+Destroyed - enfeeble - both - 4
+
+Enemy destroyed - enhance - self - 1
+Enemy destroyed - enhance - self - 2
+Played - enfeeble - both - 1
+In play - enhance - self - 2 for each enemy - enfeebled
+Ally destroyed - enhance - self - 1
+1st enhanced - enhance - ally - 3
+Destroyed - enhance - both - 2
+1st enhanced - enfeeble - enemy - 2
+Replace ally
+Replace ally
+Win lane - add score 10
+Replace ally
+Played - enfeeble - both - 6
+Played - add card to hand
+Destroyed - add card to hand
+Ally destroyed - enhance - self - 1
+Replace ally, played - enhance - ally - by replaced power
+Played - destroy - enemy
+1st enfeebled - enfeeble - enemy - 2
+Played - enfeeble - both - 1
+1st enfeebled - enhance - ally - 4
+1st enfeebled - enfeeble - enemy - 2
+1st enhanced - enfeeble - enemy - 4
+1st enhanced - enhance - all 4 | 1st enfeebled - enfeeble - all 4
+Replace ally - - enfeeble - all by replaced power
+In play - enhance - self - for each ally - enfeebled
+Played - enhance - ranks 2
+Played - enfeeble - enemy - 4
+Played - enhance - ranks 2
+Played - enfeeble - both - 1
+Destroyed - enfeeble - enemy - 1
+In play - enhance - self - 1 for each both - enfeebled
+In play - enhance - self - 1 for each both - enfeebled
+Replace ally - - enhance - ally - by replaced power
+Replace ally - - enfeeble - both - by replaced power
+In play - enhance - ally - 2
+In play - enhance - ally - 3
+Replace ally - - enfeeble - both - by replaced power
+1st enhanced - enhance - ally - 4
+Destroyed - enhance - ally - 3
+Played - enfeeble - both - 1
+In play - enhance - self - 3 for each enemy - enhanced
+Played - enhance - ranks 3
+Power hits 7 - enhance - ally - 2
+Played - enfeeble - enemy - 8
+Win lane - add score 5
+In play - enhance - ally - 3
+1st enfeebled - enfeeble - enemy - 2
+Replace ally - - enfeeble - both - by replaced power
+Played - add card to hand
+Played - add card to hand
+Destroyed - add card to hand
+In play - enhance - self - 2 for each ally - enhanced
+Played - spawn cards in empty positions
+Played - enfeeble - both - 3
+Played - enhance - ranks 2
+1st enhanced - enfeeble - enemy - 5
+In play - enhance - self - 2 for each enemy - enhanced
+Destroyed - enhance - ally - 5
+In play - enfeeble - enemy - 3
+In play - enhance - self - 3 for each ally - enfeebled
+Played - enfeeble - enemy - 5
+Played - spawn cards in empty positions
+Replace ally - - enfeeble - both - by replaced power
+In play - enhance - self - 1 for each ally - enchanced
+
+Win lane - add score 3
+Played - add card to hand
+In play - enhance - both - 2
+1st enfeebled - enfeeble - enemy - 6
+Both destroyed - enhance - self - 1
+
+In play - enfeeble - both - 1
+1st enhanced - enfeeble - both - 4
+Played - enfeeble - both - 4
+Played destroy - both
+Played - enfeeble - both - 5
+Enemy destroyed - enhance - self - 2
+In play - enhance - both - 3
+1st enfeebled - enfeeble - both - 5
+Replace ally - - enhance - ally - by replaced power
+In play - enhance - ally - 3
+Played - add card to hand
+Played - enfeeble - enemy - 4
+Destroyed - enfeeble - enemy - 9
+In play - enhance - ally - 2
+In play - enhance - ally - 2
+1st enhanced - enfeeble - both - 99
+1st enhanced - enhance - ally - 4
+
+Played - enfeeble - ally - 1
+Played - spawn cards in empty positions
+Win lane - add score 10
+In play - enhance - self - 1 for each enemy - enhanced
+In play - enhance - ally - 2
+
+Played - enhance - both - 1
+
+In play - enhance - self - 1 for each both - enhanced
+Game ends - lane's losers score added to winner'score
+Played - destroy - enemy
+In play - enhance - both - 2
+In play - enhance - self - 3 for each both - enfeebled

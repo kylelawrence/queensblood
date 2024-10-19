@@ -3,41 +3,37 @@ namespace queensblood;
 public enum Effect
 {
     None,
-    Raise,
-    Lower,
+    Enfeeble,
+    Enhance,
     Destroy,
+    AddCard,
+    AddScore,
+    PartyAnimal,
+    SpawnCards,
 }
 
-public enum Target
+public enum TargetType
 {
-    None,
-    Self,
     Ally,
     Enemy,
     Both,
+    Self,
 }
 
-public enum Trigger
+public enum ValueType
 {
     None,
-    Played,
-    InPlay,
-    AllyPlayed,
-    AllyDestroyed,
-    SelfDestroyed,
-    EnemyPlayed,
-    EnemyDestroyed,
-    AnyDestroyed,
-    Enhanced,
+    Power,
+    ReplacedPower,
+    EachEnemyEnfeebled,
+    EachAllyEnfeebled,
+    EachEnfeebled,
+    EachEnemyEnhanced,
+    EachAllyEnhanced,
+    EachEnhanced,
 }
 
-public record Ability(
-    Target Source = Target.Self,
-    Trigger Trigger = Trigger.Played,
-    Target Target = Target.Ally,
-    Effect Effect = Effect.Raise,
-    int Value = 0,
-    int Field = 0)
+public record Ability(Effect Effect, TargetType TargetType, int Value = 0, ValueType ValueType = ValueType.None)
 {
-    public static readonly Ability None = new(Target.None, Trigger.None, Target.None, Effect.None, 0);
+    public static readonly Ability None = new(Effect.None, TargetType.Enemy, 0, ValueType.None);
 }
