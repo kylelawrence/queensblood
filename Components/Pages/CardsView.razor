@@ -1,0 +1,15 @@
+@page "/cards"
+
+<PageTitle>Queen's Blood - All Cards</PageTitle>
+<div class="decks-container">
+    <div class="all-cards">
+        @for (var i = 0; i < Cards.Count; i++)
+        {
+            var index = i;
+            var card = Cards.At(i);
+            var usedCount = 0;
+            var count = 2 - usedCount;
+            <CardView CardModel="@card" />
+        }
+    </div>
+</div>

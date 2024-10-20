@@ -22,7 +22,6 @@ public enum TargetType
 
 public enum ValueType
 {
-    None,
     Power,
     ReplacedPower,
     EachEnemyEnfeebled,
@@ -33,7 +32,7 @@ public enum ValueType
     EachEnhanced,
 }
 
-public record Ability(Effect Effect, TargetType TargetType, int Value = 0, ValueType ValueType = ValueType.None)
+public record Ability(Effect Effect, TargetType TargetType, int Value = 0, ValueType ValueType = ValueType.Power, TargetType TargetTrigger = TargetType.Self)
 {
-    public static readonly Ability None = new(Effect.None, TargetType.Enemy, 0, ValueType.None);
+    public static readonly Ability None = new(Effect.None, TargetType.Enemy);
 }

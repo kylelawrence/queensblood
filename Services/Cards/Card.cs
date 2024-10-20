@@ -1,76 +1,70 @@
 namespace queensblood;
 
-public abstract class Card
+public class Card(
+    string name,
+    int cost,
+    int power,
+    RankOffset[]? rankPositions = null,
+    RankOffset[]? abilityPositions = null,
+    Ability? inPlay = null,
+    Ability? played = null,
+    Ability? destroyed = null,
+    Ability? cardDestroyed = null,
+    Ability? cardPlayed = null,
+    Ability? laneWon = null,
+    Ability? gameEnd = null,
+    Ability? enhanced = null,
+    Ability? enfeebled = null,
+    Ability? power7 = null,
+    int rankBoost = 1,
+    bool legendary = false,
+    string description = "This card has no abilities.")
 {
-    public string Name { get; protected set; } = "";
+    private bool hasBeenEnfeebled = false;
+    private bool hasBeenEnhanced = false;
 
-    public bool Replaces { get; protected set; } = false;
+    public string Name => name;
+    public readonly bool Replaces = cost == -1;
+    public int Cost => cost;
+    public int Power { get; private set; } = power;
+    public int RankBoost => rankBoost;
+    public readonly bool HasAbility = played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || gameEnd != null || enhanced != null || enfeebled != null;
+    public readonly bool Legendary = legendary;
 
-    public int Cost { get; protected set; } = 0;
+    private readonly int[] rankBoosts = (rankPositions ?? []).Select((position) => 12 + (5 * position.Row) + position.Cell).ToArray();
+    public RankOffset[] RankPositions => rankPositions ?? [];
 
-    public int Power { get; protected set; } = 0;
+    private readonly int[] abilityBoosts = (abilityPositions ?? []).Select((position) => 12 + (5 * position.Row) + position.Cell).ToArray();
+    public RankOffset[] AbilityPositions => abilityPositions ?? [];
 
-    public int RankBoost { get; protected set; } = 1;
+    public Ability InPlay => inPlay ?? Ability.None;
+    public Ability Played => played ?? Ability.None;
+    public Ability Destroyed => destroyed ?? Ability.None;
+    public Ability CardDestroyed => cardDestroyed ?? Ability.None;
+    public Ability CardPlayed => cardPlayed ?? Ability.None;
+    public Ability LaneWon => laneWon ?? Ability.None;
+    public Ability GameEnd => gameEnd ?? Ability.None;
+    public Ability Power7 => power7 ?? Ability.None;
 
-    public bool HasAbility { get; protected set; } = false;
+    private readonly Ability enhanced = enhanced ?? Ability.None;
+    public Ability Enhanced => hasBeenEnhanced ? Ability.None : enhanced;
 
-    private int[] rankBoosts = [];
-    private RankOffset[] rankPositions = [];
-    public RankOffset[] RankPositions
-    {
-        get => rankPositions; protected set
-        {
-            rankPositions = value;
-            rankBoosts = rankPositions.Select((position) => 12 + (5 * position.Row) + position.Cell).ToArray();
-        }
-    }
+    private readonly Ability enfeebled = enfeebled ?? Ability.None;
+    public Ability Enfeebled => hasBeenEnfeebled ? Ability.None : enfeebled;
 
-    private int[] abilityBoosts = [];
-    private RankOffset[] abilityPositions = [];
-    public RankOffset[] AbilityPositions
-    {
-        get => abilityPositions; protected set
-        {
-            abilityPositions = value;
-            abilityBoosts = abilityPositions.Select((position) => 12 + (5 * position.Row) + position.Cell).ToArray();
-        }
-    }
+    public bool HasRankBoost(int index) => rankBoosts.Contains(index);
 
-    public Card() { }
+    public bool HasAbilityBoost(int index) => abilityBoosts.Contains(index);
 
-    public virtual void RegisterWatcher(CardWatcher watcher) { }
-
-    public bool HasRankBoost(int index)
-    {
-        return rankBoosts.Contains(index);
-    }
-
-    public bool HasAbilityBoost(int index)
-    {
-        return abilityBoosts.Contains(index);
-    }
-
-    public virtual Ability Enfeeble(int amount)
+    public void Enfeeble(int amount)
     {
         Power = Math.Max(0, Power - amount);
-        return Ability.None;
+        hasBeenEnfeebled = true;
     }
 
-    public virtual Ability Enhance(int amount)
+    public void Enhance(int amount)
     {
         Power += amount;
-        return Ability.None;
+        hasBeenEnhanced = true;
     }
-
-    public virtual Ability Play() { return Ability.None; }
-
-    public virtual Ability Destroy() { return Ability.None; }
-
-    public virtual Ability CardDestroyed(FieldCell cell) { return Ability.None; }
-
-    public virtual Ability CardPlayed(FieldCell cell) { return Ability.None; }
-
-    public virtual Ability LaneWon() { return Ability.None; }
-
-    public virtual Ability GameEnd() { return Ability.None; }
 }

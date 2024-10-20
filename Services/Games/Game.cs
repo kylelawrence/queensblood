@@ -68,8 +68,6 @@ public class Game
 
     public bool IsActive => Id != "" && DateTime.Now.Subtract(TimeSpan.FromMinutes(Values.ACTIVE_MINUTES)) < LastUpdated;
 
-    private readonly CardWatcher cardWatcher = new();
-
     public Game(string id, string player1Id)
     {
         Id = id;
@@ -239,8 +237,8 @@ public class Game
         if (card.Replaces)
         {
             if (cell.Card == null) return;
-            RunAbility(cell.Card.Destroy(), field, rowIndex, cellIndex);
-            cardWatcher.CardDestroyed(cell);
+            RunAbility(cell.Card.Destroyed, field, rowIndex, cellIndex);
+            // TODO Notify that a card has been destroyed
         }
         // Regular cards can only be played on empty cells
         else
@@ -252,13 +250,9 @@ public class Game
         cell.Card = card;
 
         // Run it's on-play ability
-        RunAbility(cell.Card.Play(), field, rowIndex, cellIndex);
+        RunAbility(cell.Card.Played, field, rowIndex, cellIndex);
 
-        // Notify that a card has been played
-        cardWatcher.CardPlayed(cell);
-
-        // Register the card with the watcher
-        card.RegisterWatcher(cardWatcher);
+        // TODO Notify that a card has been played
 
         // Boost the pins
         foreach (var offset in card.RankPositions)
@@ -300,13 +294,13 @@ public class Game
             case Effect.SpawnCards:
                 break;
             case Effect.Enfeeble:
-                EnfeebleTargets(ability, field, rowIndex, cellIndex);
+                EnfeebleTargets(ability.Value, field, rowIndex, cellIndex);
                 break;
             case Effect.Enhance:
-                EnhanceTargets(ability, field, rowIndex, cellIndex);
+                EnhanceTargets(ability.Value, field, rowIndex, cellIndex);
                 break;
             case Effect.Destroy:
-                DestroyTargets(ability, field, rowIndex, cellIndex);
+                DestroyTargets(field, rowIndex, cellIndex);
                 break;
             default:
                 break;
@@ -389,7 +383,7 @@ public class Game
 
     private static PlayerType Opposite(PlayerType playerType) => playerType == PlayerType.Player1 ? PlayerType.Player2 : PlayerType.Player1;
 
-    private void EnfeebleTargets(Ability ability, Field field, int rowIndex, int cellIndex)
+    private void EnfeebleTargets(int amount, Field field, int rowIndex, int cellIndex)
     {
         var cell = field.Rows[rowIndex].Cells[cellIndex];
 
@@ -400,17 +394,18 @@ public class Game
             var targetCell = field.Rows[targetPosition.Row].Cells[targetPosition.Cell];
             if (targetCell.Card == null) continue;
 
-            RunAbility(targetCell.Card.Enfeeble(ability.Value), field, targetPosition.Row, targetPosition.Cell);
+            targetCell.Card.Enfeeble(amount);
+            RunAbility(targetCell.Card.Enfeebled, field, targetPosition.Row, targetPosition.Cell);
 
             if (targetCell.Card.Power <= 0)
             {
-                RunAbility(targetCell.Card.Destroy(), field, targetPosition.Row, targetPosition.Cell);
-                cardWatcher.CardDestroyed(targetCell);
+                RunAbility(targetCell.Card.Destroyed, field, targetPosition.Row, targetPosition.Cell);
+                // TODO Notify that a card has been destroyed
             }
         }
     }
 
-    private void EnhanceTargets(Ability ability, Field field, int rowIndex, int cellIndex)
+    private void EnhanceTargets(int amount, Field field, int rowIndex, int cellIndex)
     {
         var cell = field.Rows[rowIndex].Cells[cellIndex];
 
@@ -421,11 +416,12 @@ public class Game
             var targetCell = field.Rows[targetPosition.Row].Cells[targetPosition.Cell];
             if (targetCell.Card == null) continue;
 
-            RunAbility(targetCell.Card.Enhance(ability.Value), field, targetPosition.Row, targetPosition.Cell);
+            targetCell.Card.Enhance(amount);
+            RunAbility(targetCell.Card.Enhanced, field, targetPosition.Row, targetPosition.Cell);
         }
     }
 
-    private void DestroyTargets(Ability ability, Field field, int rowIndex, int cellIndex)
+    private void DestroyTargets(Field field, int rowIndex, int cellIndex)
     {
         var cell = field.Rows[rowIndex].Cells[cellIndex];
 

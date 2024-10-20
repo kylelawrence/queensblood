@@ -1,0 +1,25 @@
+.decks-container {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.all-cards {
+    flex-grow: 1;
+    border: solid 3px silver; 
+    border-radius: 10px;
+    height: 1px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px;
+    align-content: flex-start;
+    overflow-y: scroll;
+}
+
+.all-cards ::deep .card {
+    height: 200px;
+}

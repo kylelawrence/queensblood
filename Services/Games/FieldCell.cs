@@ -12,7 +12,7 @@ public class FieldCell(Card? card, int pins, PlayerType owner)
     {
         if (Card == null) return Ability.None;
 
-        var ability = Card.Destroy();
+        var ability = Card.Destroyed;
         Card = null;
         return ability;
     }
