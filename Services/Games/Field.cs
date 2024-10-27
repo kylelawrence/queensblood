@@ -6,8 +6,5 @@ public class Field(FieldRow[] rows)
 
     public FieldRow[] Rows { get; private set; } = rows;
 
-    public IEnumerable<FieldCell> GetOccupiedCells()
-    {
-        return Rows.SelectMany((row) => row.GetOccupiedCells());
-    }
+    public IEnumerable<FieldCell> OccupiedCells => Rows.SelectMany((row) => row.OccupiedCells);
 }

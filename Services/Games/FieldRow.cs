@@ -18,8 +18,10 @@ public class FieldRow(IList<FieldCell> cells)
 
     public readonly ReadOnlyCollection<FieldCell> Cells = new(cells);
 
-    public IEnumerable<FieldCell> GetOccupiedCells()
-    {
-        return Cells.Where((cell) => cell.Card != null);
-    }
+    // public IEnumerable<FieldCell> GetOccupiedCells()
+    // {
+    //     return Cells.Where((cell) => cell.Card != null);
+    // }
+
+    public IEnumerable<FieldCell> OccupiedCells => Cells.Where((cell) => cell.Card != null);
 }

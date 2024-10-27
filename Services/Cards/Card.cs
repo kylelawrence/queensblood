@@ -12,7 +12,6 @@ public class Card(
     Ability? cardDestroyed = null,
     Ability? cardPlayed = null,
     Ability? laneWon = null,
-    Ability? gameEnd = null,
     Ability? enhanced = null,
     Ability? enfeebled = null,
     Ability? power7 = null,
@@ -22,14 +21,16 @@ public class Card(
 {
     private bool hasBeenEnfeebled = false;
     private bool hasBeenEnhanced = false;
+    private bool hasHitPower7 = false;
 
-    public string Name => name;
+    public readonly string Name = name;
     public readonly bool Replaces = cost == -1;
-    public int Cost => cost;
+    public readonly int Cost = cost;
     public int Power { get; private set; } = power;
-    public int RankBoost => rankBoost;
-    public readonly bool HasAbility = played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || gameEnd != null || enhanced != null || enfeebled != null;
+    public readonly int RankBoost = rankBoost;
+    public readonly bool HasAbility = played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || enhanced != null || enfeebled != null || power7 != null;
     public readonly bool Legendary = legendary;
+    public readonly string Description = description;
 
     private readonly int[] rankBoosts = (rankPositions ?? []).Select((position) => 12 + (5 * position.Row) + position.Cell).ToArray();
     public RankOffset[] RankPositions => rankPositions ?? [];
@@ -43,14 +44,40 @@ public class Card(
     public Ability CardDestroyed => cardDestroyed ?? Ability.None;
     public Ability CardPlayed => cardPlayed ?? Ability.None;
     public Ability LaneWon => laneWon ?? Ability.None;
-    public Ability GameEnd => gameEnd ?? Ability.None;
-    public Ability Power7 => power7 ?? Ability.None;
+
+    private readonly Ability power7 = power7 ?? Ability.None;
+    public Ability Power7
+    {
+        get
+        {
+            if (hasHitPower7) return Ability.None;
+            if (Power < 7) return Ability.None;
+            hasHitPower7 = true;
+            return power7;
+        }
+    }
 
     private readonly Ability enhanced = enhanced ?? Ability.None;
-    public Ability Enhanced => hasBeenEnhanced ? Ability.None : enhanced;
+    public Ability Enhanced
+    {
+        get
+        {
+            if (hasBeenEnhanced) return Ability.None;
+            hasBeenEnhanced = true;
+            return enhanced;
+        }
+    }
 
     private readonly Ability enfeebled = enfeebled ?? Ability.None;
-    public Ability Enfeebled => hasBeenEnfeebled ? Ability.None : enfeebled;
+    public Ability Enfeebled
+    {
+        get
+        {
+            if (hasBeenEnfeebled) return Ability.None;
+            hasBeenEnfeebled = true;
+            return enfeebled;
+        }
+    }
 
     public bool HasRankBoost(int index) => rankBoosts.Contains(index);
 
@@ -59,12 +86,10 @@ public class Card(
     public void Enfeeble(int amount)
     {
         Power = Math.Max(0, Power - amount);
-        hasBeenEnfeebled = true;
     }
 
     public void Enhance(int amount)
     {
         Power += amount;
-        hasBeenEnhanced = true;
     }
 }

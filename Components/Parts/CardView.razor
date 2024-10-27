@@ -1,41 +1,33 @@
 <div class="card @(this.MaybeClass("selected", Selected))" @onclick="HandleClick">
-    @if (Simple)
-    {
-        <div class="value">@CardModel?.Power</div>
-    }
-    else
-    {
-        <div class="pin-cost">
-            @for (var i = 0; i < CardModel?.Cost; i++)
-            {
-                <img title="pin cost" src="/black-pawn.svg" />
-            }
-        </div>
-        <div class="value">@CardModel?.Power</div>
-        <div class="field">
+    <div class="pin-cost">
+        @for (var i = 0; i < CardModel?.Cost; i++)
+        {
+            <img title="pin cost" src="/black-pawn.svg" />
+        }
+    </div>
+    <div class="value">@CardModel?.Power</div>
+    <div class="field">
         @for (var i = 0; i < 25; i++)
-            {
-                var index = i;
-                var onClick = () => OnFieldClick(index);
+        {
+            var index = i;
+            var onClick = () => OnFieldClick(index);
 
-                var middle = this.MaybeClass("field-middle", index == 12);
-                var boosted = this.MaybeClass("field-boosted", CardModel?.HasRankBoost(index) == true);
-                var ability = this.MaybeClass("field-ability", CardModel?.HasAbilityBoost(index) == true);
-                var classList = $"{middle} {boosted} {ability} boost-{i}";
+            var middle = this.MaybeClass("field-middle", index == 12);
+            var boosted = this.MaybeClass("field-boosted", CardModel?.HasRankBoost(index) == true);
+            var ability = this.MaybeClass("field-ability", CardModel?.HasAbilityBoost(index) == true);
+            var classList = $"{middle} {boosted} {ability} boost-{i}";
 
-                <div class="@classList" @onclick="onClick"></div>
-            }
-        </div>
-        <div class="name">
-            <svg viewBox="0 0 200 28">
-                <text x="100" y="18" text-anchor="middle" fill="white" font-size="20px">@CardModel?.Name</text>
-            </svg>
-        </div>
-    }
+            <div class="@classList" @onclick="onClick"></div>
+        }
+    </div>
+    <div class="name">
+        <svg viewBox="0 0 200 28">
+            <text x="100" y="18" text-anchor="middle" fill="white" font-size="20px">@CardModel?.Name</text>
+        </svg>
+    </div>
 </div>
 
 @code {
-    [Parameter] public bool Simple { get; set; }
     [Parameter] public bool Selected { get; set; }
     [Parameter] public Card? CardModel { get; set; } = null;
     [Parameter] public Action<Card?> OnClick { get; set; } = (Card? card) => { };
