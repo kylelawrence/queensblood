@@ -25,11 +25,7 @@ public enum GameEventType
 
 public class Game
 {
-    public int Round { get; private set; } = 1;
-
     public static readonly Game None = new("", "");
-
-    public event EventHandler OnGameUpdated = delegate { };
 
     public string Id { get; }
 
@@ -38,6 +34,12 @@ public class Game
     public DateTime LastUpdated { get; private set; } = DateTime.Now;
 
     public GameState State { get; private set; } = GameState.PickingDecks;
+
+    public bool IsActive => Id != "" && DateTime.Now.Subtract(TimeSpan.FromMinutes(Values.ACTIVE_MINUTES)) < LastUpdated;
+
+    public event EventHandler OnGameUpdated = delegate { };
+
+    public int Round { get; private set; } = 1;
 
     public PlayerType PlayerTurn { get; private set; } = PlayerType.Undecided;
 
@@ -65,8 +67,6 @@ public class Game
     public bool PlayerHasSkipped = false;
 
     public PlayerType Winner { get; private set; } = PlayerType.Undecided;
-
-    public bool IsActive => Id != "" && DateTime.Now.Subtract(TimeSpan.FromMinutes(Values.ACTIVE_MINUTES)) < LastUpdated;
 
     public Game(string id, string player1Id)
     {
