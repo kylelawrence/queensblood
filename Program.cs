@@ -7,7 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services
     .AddHttpContextAccessor()
-    .AddSingleton<TestService>()
     .AddSingleton<IGamesService, GamesMemService>()
     .AddSingleton<IPlayersService, PlayersMemService>()
     // Local Decks depends on IJSRuntime, so it gets scoped to user
