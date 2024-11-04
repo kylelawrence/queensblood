@@ -1,5 +1,7 @@
 namespace queensblood;
 
+public record RankOffset(int Row, int Cell);
+
 public class Card(
     string name,
     int cost,
