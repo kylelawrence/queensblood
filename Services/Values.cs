@@ -12,4 +12,5 @@ public static class Values
     public const int HAND_SIZE = 5;
     public const int ACTIVE_MINUTES = 15;
     public const int CLEANUP_INTERVAL = 5;
+    public const int FIRST_LEGENDARY_INDEX = 85;
 }

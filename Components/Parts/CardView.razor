@@ -1,4 +1,5 @@
-<div class="card @(this.MaybeClass("selected", Selected))" @onclick="HandleClick">
+<div class="card @(this.MaybeClass("selected", Selected)) @(this.MaybeClass("legendary", this.CardModel?.Legendary == true))" @onclick="HandleClick">
+    <div class="image" style='background-image: url("@(CardModel?.ImageUrl)");@(Transform)'></div>
     <div class="pin-cost">
         @for (var i = 0; i < CardModel?.Cost; i++)
         {
@@ -25,7 +26,7 @@
             <text x="100" y="18" text-anchor="middle" fill="white" font-size="20px">@CardModel?.Name</text>
         </svg>
     </div>
-    <div class="desc">@CardModel?.Description</div>
+    <div class="desc" style="z-index: 1000;">@CardModel?.Description</div>
 </div>
 
 @code {
@@ -33,6 +34,18 @@
     [Parameter] public Card? CardModel { get; set; } = null;
     [Parameter] public Action<Card?> OnClick { get; set; } = (Card? card) => { };
     [Parameter] public Action<int> OnFieldClick { get; set; } = (int index) => { };
+    public string Transform { get; set; } = "";
 
-    private void HandleClick() => OnClick(CardModel);
+    private void HandleClick() {
+        OnClick(CardModel);
+    }
+
+    override protected void OnParametersSet()
+    {
+        if (CardModel == null) return;
+        // Create a css transform out of the CardModel.ImageOffsets property
+        var translate = $"translate({CardModel.ImageOffsets.XOffset}px, {CardModel.ImageOffsets.YOffset}px)";
+        var scale = $"scale({CardModel.ImageOffsets.Scale})";
+        Transform = $"transform: {translate} {scale};";
+    }
 }

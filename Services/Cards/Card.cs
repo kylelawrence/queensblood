@@ -1,6 +1,7 @@
 namespace queensblood;
 
 public record RankOffset(int Row, int Cell);
+public record ImageOffsets(int XOffset = 0, int YOffset = 0, float Scale = 1.0f);
 
 public class Card(
     string name,
@@ -19,7 +20,8 @@ public class Card(
     Ability? power7 = null,
     int rankBoost = 1,
     bool legendary = false,
-    string description = "This card has no abilities.")
+    string description = "This card has no abilities.",
+    ImageOffsets? imageOffsets = null)
 {
     private bool hasBeenEnfeebled = false;
     private bool hasBeenEnhanced = false;
@@ -28,6 +30,8 @@ public class Card(
     public readonly string Name = name;
     public readonly bool Replaces = cost == -1;
     public readonly int Cost = cost;
+    public readonly string ImageUrl = $"/images/{name.ToLower()}.gif";
+    public readonly ImageOffsets ImageOffsets = imageOffsets ?? new();
     public int Power { get; private set; } = power;
     public readonly int RankBoost = rankBoost;
     public readonly bool HasAbility = played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || enhanced != null || enfeebled != null || power7 != null;

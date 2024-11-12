@@ -14,10 +14,12 @@
     <div class="active-deck">
         @foreach (var pair in currentDeckCards)
         {
-            var card = Cards.At(pair.Key);//cards[pair.Key];
+            var card = Cards.At(pair.Key);
+            if (card == null) continue;
+            var max = card.Legendary ? 1 : 2;
             <div class="card-holder">
                 <CardView CardModel="@card" OnClick="(Card _) => HandleRemoveCardClick(pair.Key)" />
-                <div>@pair.Value/2</div>
+                <div>@pair.Value/@max</div>
             </div>
         }
     </div>
@@ -27,12 +29,15 @@
         {
             var index = i;
             var card = Cards.At(i);
+            if (card == null) continue;
+            var max = card.Legendary ? 1 : 2;
             var usedCount = 0;
             currentDeckCards.TryGetValue(index, out usedCount);
-            var count = 2 - usedCount;
+            var count = max - usedCount;
+            if (count <= 0) continue;
             <div class="card-holder">
                 <CardView CardModel="@card" OnClick="(Card _) => HandleAddCardClick(index)" />
-                <div>@count/2</div>
+                <div>@count/@max</div>
             </div>
         }
     </div>
@@ -76,13 +81,14 @@
     {
         if (currentDeckIndex < 0) return;
         if (GetCurrentDeckCardCount() >= Deck.DECK_SIZE) return;
+        var max = index < Values.FIRST_LEGENDARY_INDEX ? 2 : 1;
 
         int count = 0;
         if (currentDeckCards.TryGetValue(index, out count))
         {
-            if (count < 2)
+            if (count < max)
             {
-                currentDeckCards[index] = 2;
+                currentDeckCards[index] = max;
             }
         }
         else
