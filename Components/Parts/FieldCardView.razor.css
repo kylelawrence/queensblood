@@ -2,7 +2,19 @@
     border: solid 4px silver;
     border-radius: 10px;
     position: relative;
-    background: #338;
+    background: url('/images/blue.jpg') center/cover no-repeat;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.image {
+    background-repeat: no-repeat;
+    background-position: 60% 10%;
+    background-size: 200%;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
 .field-card .value {
@@ -19,10 +31,12 @@
     height: 30px;
     font-size: 16px;
     padding-top: 2px;
+    z-index: 2;
+    background: rgb(0, 0, 0, 0.75);
 }
 
 .opponent {
-    background: firebrick;
+    background: url('/images/red.jpg') center/cover no-repeat;
 }
 
 .desc {

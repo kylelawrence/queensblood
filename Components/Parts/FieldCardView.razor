@@ -1,4 +1,5 @@
 <div class="field-card @(this.MaybeClass("opponent", IsOpponent))">
+    <div class="image" style='background-image: url("@(CardModel?.ImageUrl)");@(Transform)'></div>
     <div class="value">@CardModel?.Power</div>
     <div class="desc">@CardModel?.Description</div>
 </div>
@@ -6,4 +7,14 @@
 @code {
     [Parameter] public Card? CardModel { get; set; } = null;
     [Parameter] public bool IsOpponent { get; set; } = false;
+    public string Transform { get; set; } = "";
+
+    override protected void OnParametersSet()
+    {
+        if (CardModel == null) return;
+        // Create a css transform out of the CardModel.ImageOffsets property
+        var translate = $"translate({CardModel.ImageOffsets.XOffset}px, {CardModel.ImageOffsets.YOffset}px)";
+        var scale = $"scale({CardModel.ImageOffsets.Scale})";
+        Transform = $"transform: {translate} {scale};";
+    }
 }
