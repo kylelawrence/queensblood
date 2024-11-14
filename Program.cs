@@ -32,11 +32,7 @@ app.UseStaticFiles();
 app.UseAntiforgery();
 
 // Ensure player has an ID
-app.Use((context, next) => {
-    var playersService = context.RequestServices.GetService<IPlayersService>()!;
-    playersService.EnsurePlayerId(context);
-    return next(context);
-});
+app.UsePlayerID();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

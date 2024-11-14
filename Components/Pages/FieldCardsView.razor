@@ -1,0 +1,13 @@
+@page "/field"
+
+<PageTitle>Queen's Blood - Field</PageTitle>
+<div class="field-container">
+    <div class="field-cards">
+        @for (var i = 0; i < Cards.Count; i++)
+        {
+            var index = i;
+            var card = Cards.At(i);
+            <FieldCardView CardModel="@card" />
+        }
+    </div>
+</div>
