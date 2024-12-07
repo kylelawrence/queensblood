@@ -8,6 +8,7 @@ public enum GameState
     Mulligan,
     Playing,
     GameOver,
+    Debug,
 }
 
 public enum PlayerType
@@ -90,6 +91,15 @@ public class Game
 
         player1Field = new Field(player1Rows);
         player2Field = new Field(player2Rows);
+    }
+
+    public static Game CreateDebug()
+    {
+        return new("debug", "debug1")
+        {
+            player2Id = "debug2",
+            State = GameState.Debug
+        };
     }
 
     public PlayerType Join(string playerId)
@@ -285,6 +295,13 @@ public class Game
 
         // Change turn
         ChangeTurnAndDraw();
+    }
+
+    public void DebugPlayCard(Card card, Field field, int rowIndex, int cellIndex, PlayerType playerType)
+    {
+        if (Id != "debug") return;
+        
+        PlaceCard(card, field, rowIndex, cellIndex, playerType);
     }
 
     private void PlaceCard(Card card, Field field, int rowIndex, int cellIndex, PlayerType playerType)

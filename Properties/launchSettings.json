@@ -9,24 +9,13 @@
       }
     },
     "profiles": {
-      "http": {
-        "commandName": "Project",
-        "dotnetRunMessages": true,
-        "launchBrowser": true,
-        "applicationUrl": "http://localhost:5139",
-        "environmentVariables": {
-          "ASPNETCORE_ENVIRONMENT": "Development",
-          "COSMOS_CONNECTION_STRING": "mongodb://127.0.0.1:27017/"
-        }
-      },
       "https": {
         "commandName": "Project",
         "dotnetRunMessages": true,
         "launchBrowser": true,
-        "applicationUrl": "https://localhost:7033;http://localhost:5139",
+        "applicationUrl": "https://localhost:5001",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development",
-          "COSMOS_CONNECTION_STRING": "mongodb://127.0.0.1:27017/"
         }
       },
       "IIS Express": {
@@ -34,7 +23,6 @@
         "launchBrowser": true,
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development",
-          "COSMOS_CONNECTION_STRING": "mongodb://127.0.0.1:27017/"
         }
       }
     }

@@ -1,0 +1,102 @@
+@page "/debug"
+@inherits GameWatcher
+<div class="container">
+    <div class="field-grid-container">
+        <div class="field-grid">
+            @for (var ri = 0; ri < Field.Rows.Length; ri++)
+            {
+                var rowIndex = ri;
+                var row = Field.Rows[rowIndex];
+                <div class="score cell">@GetRowScore(row)</div>
+                @for (var ci = 0; ci < row.Cells.Count; ci++)
+                {
+                    var cellIndex = ci;
+                    var cell = row.Cells[cellIndex];
+                    var cellClass = $"cell c{rowIndex}{cellIndex}";
+                    var isOpponent = cell.Owner != PlayerType.Player1;
+                    var opponentClass = this.MaybeClass("opponent", isOpponent);
+                    if (cell.Owner == PlayerType.Undecided) opponentClass = "";
+
+                    if (cell.Card == null)
+                    {
+                        var onClick = () => HandleFieldClick(rowIndex, cellIndex);
+                        <button type="button" class="@cellClass @opponentClass" @onclick="onClick">
+                            @for (var pin = 0; pin < cell.Pins; pin++)
+                            {
+                                <span>!</span>
+                            }
+                        </button>
+                    }
+                    else
+                    {
+                        <FieldCardView CardModel="@cell.Card" IsOpponent="@isOpponent" />
+                    }
+                }
+                <div class="score cell">@GetOpponentRowScore(row)</div>
+            }
+        </div>
+    </div>
+    <div style="display: flex; justify-content: center;">
+        Play as opponent
+        <label class="switch">
+            <input type="checkbox">
+            <span class="slider round"></span>
+        </label>
+    </div>
+    <div class="all-cards">
+        @for (var i = 0; i < Cards.Count; i++)
+        {
+            var index = i;
+            var card = Cards.At(i);
+            var onClick = (Card _) => HandleCardClick(index);
+            var selected = CurrentSelectedIndex == index;
+            <div class="card-holder">
+                <CardView CardModel="@card" OnClick="onClick" Selected="selected" />
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private Field Field = Field.None;
+    private int CurrentSelectedIndex = -1;
+
+    private string GetRowScore(FieldRow row)
+    {
+        int score = row.Player1Score;
+        return score > 0 ? score.ToString() : "";
+    }
+
+    private string GetOpponentRowScore(FieldRow row)
+    {
+        int score = row.Player2Score;
+        return score > 0 ? score.ToString() : "";
+    }
+
+    protected override void OnInitialized()
+    {
+        this.Game = Game.CreateDebug();
+        this.Game.Join("debug2");
+        this.Field = Game.GetField(PlayerType.Player1);
+    }
+
+    private void HandleFieldClick(int rowIndex, int cellIndex)
+    {
+        var card = Cards.At(CurrentSelectedIndex)!;
+        Game.DebugPlayCard(card, Field, rowIndex, cellIndex, PlayerType.Player1);
+    }
+
+    private void HandleCardClick(int index)
+    {
+        if (CurrentSelectedIndex == index)
+        {
+            CurrentSelectedIndex = -1;
+        }
+        else
+        {
+            CurrentSelectedIndex = index;
+        }
+
+        StateHasChanged();
+    }
+}
