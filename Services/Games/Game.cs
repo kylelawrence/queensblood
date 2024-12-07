@@ -300,7 +300,7 @@ public class Game
     public void DebugPlayCard(Card card, Field field, int rowIndex, int cellIndex, PlayerType playerType)
     {
         if (Id != "debug") return;
-        
+        field.Rows[rowIndex].Cells[cellIndex].Owner = playerType;
         PlaceCard(card, field, rowIndex, cellIndex, playerType);
     }
 
