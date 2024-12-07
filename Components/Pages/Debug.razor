@@ -39,7 +39,7 @@
     <div style="display: flex; justify-content: center;">
         Play as opponent
         <label class="switch">
-            <input type="checkbox">
+            <input type="checkbox" @onchange="HandleOpponentChange">
             <span class="slider round"></span>
         </label>
     </div>
@@ -58,18 +58,19 @@
 </div>
 
 @code {
+    private PlayerType CurrentPlayerType = PlayerType.Player1;
     private Field Field = Field.None;
     private int CurrentSelectedIndex = -1;
 
     private string GetRowScore(FieldRow row)
     {
-        int score = row.Player1Score;
+        int score = CurrentPlayerType == PlayerType.Player1 ? row.Player1Score : row.Player2Score;
         return score > 0 ? score.ToString() : "";
     }
 
     private string GetOpponentRowScore(FieldRow row)
     {
-        int score = row.Player2Score;
+        int score = CurrentPlayerType == PlayerType.Player1 ? row.Player2Score : row.Player1Score;
         return score > 0 ? score.ToString() : "";
     }
 
@@ -83,7 +84,7 @@
     private void HandleFieldClick(int rowIndex, int cellIndex)
     {
         var card = Cards.At(CurrentSelectedIndex)!;
-        Game.DebugPlayCard(card, Field, rowIndex, cellIndex, PlayerType.Player1);
+        Game.DebugPlayCard(card, Field, rowIndex, cellIndex, CurrentPlayerType);
     }
 
     private void HandleCardClick(int index)
@@ -97,6 +98,14 @@
             CurrentSelectedIndex = index;
         }
 
+        StateHasChanged();
+    }
+
+    private void HandleOpponentChange(ChangeEventArgs e)
+    {
+        var isChecked = e.Value as bool? ?? false;
+        CurrentPlayerType = isChecked ? PlayerType.Player2 : PlayerType.Player1;
+        Field = Game.GetField(CurrentPlayerType);
         StateHasChanged();
     }
 }
