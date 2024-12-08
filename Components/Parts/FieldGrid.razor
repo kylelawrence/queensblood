@@ -1,0 +1,45 @@
+<div class="field-grid-container">
+    <div class="field-grid">
+        @for (var ri = 0; ri < Field.Rows.Length; ri++)
+        {
+            var rowIndex = ri;
+            var row = Field.Rows[rowIndex];
+            <div class="score cell">@GetRowScore(row)</div>
+            @for (var ci = 0; ci < row.Cells.Count; ci++)
+            {
+                var cellIndex = ci;
+                var cell = row.Cells[cellIndex];
+                var cellClass = $"cell c{rowIndex}{cellIndex}";
+                var isOpponent = cell.Owner != CurrentPlayerType;
+                var opponentClass = this.MaybeClass("opponent", isOpponent);
+                var onClick = () => OnFieldClick(rowIndex, cellIndex);
+                if (cell.Owner == PlayerType.Undecided) opponentClass = "";
+
+                <button type="button" class="@cellClass @opponentClass" @onclick="onClick" title="Cell">
+                    @if (cell.Card == null)
+                    {
+                        <div class="pins">
+                            @for (var pin = 0; pin < cell.Pins; pin++)
+                            {
+                                <span>!</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <FieldCardView CardModel="@cell.Card" IsOpponent="@isOpponent" />
+                    }
+                </button>
+            }
+            <div class="score cell">@GetOpponentRowScore(row)</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public Field Field { get; set; } = Field.None;
+    [Parameter] public PlayerType CurrentPlayerType { get; set; } = PlayerType.Player1;
+    [Parameter] public Action<int, int> OnFieldClick { get; set; } = (_, _) => { };
+    [Parameter] public Func<FieldRow, string> GetRowScore { get; set; } = (_) => "";
+    [Parameter] public Func<FieldRow, string> GetOpponentRowScore { get; set; } = (_) => "";
+}

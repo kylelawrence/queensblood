@@ -13,8 +13,8 @@
     {
         if (CardModel == null) return;
         // Create a css transform out of the CardModel.ImageOffsets property
-        var translate = $"translate({CardModel.ImageOffsets.XOffset}px, {CardModel.ImageOffsets.YOffset}px)";
-        var scale = $"scale({CardModel.ImageOffsets.Scale})";
+        var translate = $"translate({CardModel.FieldImageOffsets.XOffset}px, {CardModel.FieldImageOffsets.YOffset}px)";
+        var scale = $"scale({CardModel.FieldImageOffsets.Scale})";
         Transform = $"transform: {translate} {scale};";
     }
 }

@@ -60,7 +60,6 @@ public class Game
     private readonly List<Card> player1Hand = [];
     private readonly List<Card> player2Hand = [];
 
-    // public Field Field { get; } = new();
     private readonly Field player1Field;
     private readonly Field player2Field;
     public Field GetField(PlayerType playerType) => playerType == PlayerType.Player2 ? player2Field : player1Field;
@@ -261,8 +260,7 @@ public class Game
         var cell = field.Rows[rowIndex].Cells[cellIndex];
 
         // Check some validity
-        var validCell = State == GameState.Playing && PlayerTurn == playerType && cell.Owner == playerType;
-        if (!validCell) return;
+        if (State != GameState.Playing || PlayerTurn != playerType || cell.Owner != playerType) return;
 
         // Get the correct hand based on player type
         var hand = playerId == player1Id ? player1Hand : player2Hand;
@@ -273,25 +271,8 @@ public class Game
         if (card == null || card.Cost > cell.Pins) return;
         hand.RemoveAt(handIndex);
 
-        // Replacer cards destroy the card they replace
-        // And must be played against a cell with a card
-        if (card.Replaces)
-        {
-            if (cell.Card == null) return;
-
-            RunAbility(cell.Card.Destroyed, field, rowIndex, cellIndex);
-            
-            // Run any "other card destroyed" abilities
-            RunCardDestroyedAbilities(field, rowIndex, cellIndex);
-        }
-        // Regular cards can only be played on empty cells
-        else
-        {
-            if (cell.Card != null) return;
-        }
-
         // Place the card
-        PlaceCard(card, field, rowIndex, cellIndex, playerType);
+        if (!PlaceCard(card, field, rowIndex, cellIndex, playerType)) return;
 
         // Change turn
         ChangeTurnAndDraw();
@@ -304,9 +285,28 @@ public class Game
         PlaceCard(card, field, rowIndex, cellIndex, playerType);
     }
 
-    private void PlaceCard(Card card, Field field, int rowIndex, int cellIndex, PlayerType playerType)
+    private bool PlaceCard(Card card, Field field, int rowIndex, int cellIndex, PlayerType playerType)
     {
-        field.Rows[rowIndex].Cells[cellIndex].Card = card;
+        var cell = field.Rows[rowIndex].Cells[cellIndex];
+
+        // Replacer cards destroy the card they replace
+        // And must be played against a cell with a card
+        if (card.Replaces)
+        {
+            if (cell.Card == null) return false;
+
+            RunAbility(cell.Card.Destroyed, field, rowIndex, cellIndex);
+            
+            // Run any "other card destroyed" abilities
+            RunCardDestroyedAbilities(field, rowIndex, cellIndex);
+        }
+        // Regular cards can only be played on empty cells
+        else
+        {
+            if (cell.Card != null) return false;
+        }
+
+        cell.Card = card;
 
         // Run it's on-play ability
         RunAbility(card.Played, field, rowIndex, cellIndex);
@@ -328,6 +328,8 @@ public class Game
             targetCell.Pins = Math.Min(3, targetCell.Pins + card.RankBoost);
             targetCell.Owner = playerType;
         }
+
+        return true;
     }
 
     private void RunCardPlayedAbilities(Field hostField, int hostRowIndex, int hostCellIndex)

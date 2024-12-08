@@ -9,6 +9,7 @@
     flex-direction: column;
     height: 230px;
     justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .hand {
@@ -16,10 +17,6 @@
     flex-direction: row;
     gap: 10px;
     padding-right: 4px;
-}
-
-.card-desc {
-    height: 20px;
 }
 
 .field-grid-container {

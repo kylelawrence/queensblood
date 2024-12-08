@@ -6,156 +6,9 @@
     gap: 10px;
 }
 
-.hands {
-    display: flex;
-    flex-direction: column;
-    height: 230px;
-    justify-content: space-between;
-}
-
-.hand {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    padding-right: 4px;
-}
-
-.card-desc {
-    height: 20px;
-}
-
-.field-grid-container {
-    flex-grow: 1;
-    display: grid;
-    place-items: center;
-}
-
-.field-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 100px);
-    grid-template-rows: repeat(3, 160px);
-    border: solid 8px silver;
-}
-
-.cell {
-    all: unset;
-    font-size: 30px;
-    font-weight: bold;
-    text-align: center;
-    color: royalblue;
-}
-
-.cell.opponent {
-    color: red;
-}
-
-.center-label {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 350px;
-    height: 100px;
-    border: solid 3px white;
-    border-radius: 5px;
-    background: darkgray;
-    color: black;
-    font-size: 20px;
-}
-
-.center-label div {
-    text-align: center;
-}
-
-.mulligan-button {
-    position: fixed;
-    right: 10%;
-    bottom: 10%;
-    background: gold;
-    color: #222;
-    width: 200px;
-    height: 60px;
-    font-weight: bold;
-    border-radius: 10px;
-    border: solid 3px silver;
-}
-
-.field-card {
-    background: #444;
-}
-
-.c00,
-.c02,
-.c04,
-.c11,
-.c13,
-.c20,
-.c22,
-.c24 {
-    background: gainsboro;
-}
-
-.score {
-    border: solid 4px #222;
-    box-shadow: 1px 1px 5px #111 inset;
-    display: grid;
-    place-items: center;
-    color: silver;
-}
-
-.turn-label {
-    position: fixed;
-    right: 10%;
-    bottom: 10%;
-    text-align: center;
-}
-
-.turn-label div {
-    text-align: center;
-}
-
-.skip-button {
-    margin-top: 5px;
-    background: gold;
-    color: black;
-    border-radius: 5px;
-    padding: 10px;
-}
-
-.forfeit-button {
-    all: unset;
-    position:absolute;
-    opacity: .4;
-    top: 20px;
-    right: 20px;
-    outline: none;
-    margin-top: 5px;
-    background: red;
-    color: white;
-    border-radius: 5px;
-    padding: 10px;
-    cursor: pointer;
-}
-
-.forfeit-button:hover {
-    opacity: 1;
-}
-
-.active-deck {
-    border: solid 3px silver;
-    border-radius: 10px;
-    overflow-x: scroll;
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    padding: 10px;
-    gap: 10px;
-    min-height: 245px;
-}
-
 .all-cards {
     height: 500px;
-    border: solid 3px silver; 
+    border: solid 3px silver;
     border-radius: 10px;
     display: flex;
     flex-direction: row;
@@ -170,6 +23,12 @@
 .all-cards ::deep .card {
     height: 200px;
 }
+
+.opponent-container {
+    display: flex;
+    justify-content: center;
+}
+
 /* The switch - the box around the slider */
 .switch {
     position: relative;
@@ -178,17 +37,17 @@
     height: 24px;
     margin-left: 10px;
     margin-bottom: 8px;
-  }
-  
-  /* Hide default HTML checkbox */
-  .switch input {
+}
+
+/* Hide default HTML checkbox */
+.switch input {
     opacity: 0;
     width: 0;
     height: 0;
-  }
-  
-  /* The slider */
-  .slider {
+}
+
+/* The slider */
+.slider {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -198,9 +57,9 @@
     background-color: #ccc;
     -webkit-transition: .4s;
     transition: .4s;
-  }
-  
-  .slider:before {
+}
+
+.slider:before {
     position: absolute;
     content: "";
     height: 16px;
@@ -210,27 +69,27 @@
     background-color: white;
     -webkit-transition: .4s;
     transition: .4s;
-  }
-  
-  input:checked + .slider {
+}
+
+input:checked+.slider {
     background-color: #2196F3;
-  }
-  
-  input:focus + .slider {
+}
+
+input:focus+.slider {
     box-shadow: 0 0 1px #2196F3;
-  }
-  
-  input:checked + .slider:before {
+}
+
+input:checked+.slider:before {
     -webkit-transform: translateX(26px);
     -ms-transform: translateX(26px);
     transform: translateX(26px);
-  }
-  
-  /* Rounded sliders */
-  .slider.round {
+}
+
+/* Rounded sliders */
+.slider.round {
     border-radius: 34px;
-  }
-  
-  .slider.round:before {
+}
+
+.slider.round:before {
     border-radius: 50%;
-  }
+}

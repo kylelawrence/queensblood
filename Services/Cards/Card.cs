@@ -21,7 +21,8 @@ public class Card(
     int rankBoost = 1,
     bool legendary = false,
     string description = "This card has no abilities.",
-    ImageOffsets? imageOffsets = null)
+    ImageOffsets? imageOffsets = null,
+    ImageOffsets? fieldImageOffsets = null)
 {
     private bool hasBeenEnfeebled = false;
     private bool hasBeenEnhanced = false;
@@ -32,6 +33,7 @@ public class Card(
     public readonly int Cost = cost;
     public readonly string ImageUrl = $"/images/{name.ToLower()}.gif";
     public readonly ImageOffsets ImageOffsets = imageOffsets ?? new();
+    public readonly ImageOffsets FieldImageOffsets = fieldImageOffsets ?? new();
     public int Power { get; private set; } = power;
     public readonly int RankBoost = rankBoost;
     public readonly bool HasAbility = played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || enhanced != null || enfeebled != null || power7 != null;

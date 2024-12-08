@@ -1,0 +1,51 @@
+.field-grid-container {
+    flex-grow: 1;
+    display: grid;
+    place-items: center;
+}
+
+.field-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 100px);
+    grid-template-rows: repeat(3, 160px);
+    border: solid 8px silver;
+}
+
+.cell {
+    all: unset;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    color: royalblue;
+    display: grid;
+    place-items: stretch;
+}
+
+.cell.opponent {
+    color: red;
+}
+
+.score {
+    border: solid 4px #222;
+    box-shadow: 1px 1px 5px #111 inset;
+    display: grid;
+    place-items: center;
+    color: silver;
+}
+
+.c00,
+.c02,
+.c04,
+.c11,
+.c13,
+.c20,
+.c22,
+.c24 {
+    background: gainsboro;
+}
+
+.pins {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

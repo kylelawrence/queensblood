@@ -1,42 +1,14 @@
 @page "/debug"
 @inherits GameWatcher
 <div class="container">
-    <div class="field-grid-container">
-        <div class="field-grid">
-            @for (var ri = 0; ri < Field.Rows.Length; ri++)
-            {
-                var rowIndex = ri;
-                var row = Field.Rows[rowIndex];
-                <div class="score cell">@GetRowScore(row)</div>
-                @for (var ci = 0; ci < row.Cells.Count; ci++)
-                {
-                    var cellIndex = ci;
-                    var cell = row.Cells[cellIndex];
-                    var cellClass = $"cell c{rowIndex}{cellIndex}";
-                    var isOpponent = cell.Owner != PlayerType.Player1;
-                    var opponentClass = this.MaybeClass("opponent", isOpponent);
-                    if (cell.Owner == PlayerType.Undecided) opponentClass = "";
-
-                    if (cell.Card == null)
-                    {
-                        var onClick = () => HandleFieldClick(rowIndex, cellIndex);
-                        <button type="button" class="@cellClass @opponentClass" @onclick="onClick">
-                            @for (var pin = 0; pin < cell.Pins; pin++)
-                            {
-                                <span>!</span>
-                            }
-                        </button>
-                    }
-                    else
-                    {
-                        <FieldCardView CardModel="@cell.Card" IsOpponent="@isOpponent" />
-                    }
-                }
-                <div class="score cell">@GetOpponentRowScore(row)</div>
-            }
-        </div>
-    </div>
-    <div style="display: flex; justify-content: center;">
+    <FieldGrid
+        Field="Field"
+        OnFieldClick="HandleFieldClick"
+        GetRowScore="GetRowScore"
+        GetOpponentRowScore="GetOpponentRowScore"
+        CurrentPlayerType="CurrentPlayerType"
+    />
+    <div class="opponent-container">
         Play as opponent
         <label class="switch">
             <input type="checkbox" @onchange="HandleOpponentChange">
