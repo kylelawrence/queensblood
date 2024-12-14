@@ -55,6 +55,7 @@
 
     private void HandleFieldClick(int rowIndex, int cellIndex)
     {
+        if (CurrentSelectedIndex == -1) return;
         var card = Cards.At(CurrentSelectedIndex)!;
         Game.DebugPlayCard(card, Field, rowIndex, cellIndex, CurrentPlayerType);
     }

@@ -37,4 +37,9 @@ app.UsePlayerID();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+app.MapGet("/descs", () => {
+    var descs = Cards.All.Where(c => c.HasAbility).Select(c => c.Description).OrderBy(d => d).Distinct().ToArray();
+    return Results.Text(string.Join("\n", descs));
+});
+
 app.Run();

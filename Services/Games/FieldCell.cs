@@ -8,6 +8,8 @@ public class FieldCell(Card? card, int pins, PlayerType owner)
     public int Pins { get; set; } = pins;
     public PlayerType Owner { get; set; } = owner;
 
+    public Dictionary<string, Tuple<int, PlayerType>> PowerEffects { get; set; } = [];
+
     public Ability Destroy()
     {
         if (Card == null) return Ability.None;

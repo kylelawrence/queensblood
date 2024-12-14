@@ -5,6 +5,10 @@
         {
             <img title="pin cost" src="/black-pawn.svg" />
         }
+        @if (CardModel?.Replaces == true)
+        {
+            <img title="replaces" src="/replaces.svg" />
+        }
     </div>
     <div class="value">@CardModel?.Power</div>
     <div class="field">

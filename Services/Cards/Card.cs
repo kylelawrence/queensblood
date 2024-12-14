@@ -36,9 +36,11 @@ public class Card(
     public readonly ImageOffsets FieldImageOffsets = fieldImageOffsets ?? new();
     public int Power { get; private set; } = power;
     public readonly int RankBoost = rankBoost;
-    public readonly bool HasAbility = played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || enhanced != null || enfeebled != null || power7 != null;
+    public readonly bool HasAbility = inPlay != null || played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || enhanced != null || enfeebled != null || power7 != null;
     public readonly bool Legendary = legendary;
     public readonly string Description = description;
+
+    public int PowerAdjustment { get; set; } = 0;
 
     private readonly int[] rankBoosts = (rankPositions ?? []).Select((position) => 12 + (5 * position.Row) + position.Cell).ToArray();
     public RankOffset[] RankPositions => rankPositions ?? [];
