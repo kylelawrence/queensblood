@@ -1,13 +1,12 @@
 .container {
     display: flex;
     flex-grow: 1;
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
     gap: 10px;
 }
 
 .all-cards {
-    height: 500px;
     border: solid 3px silver;
     border-radius: 10px;
     display: flex;
@@ -25,6 +24,9 @@
 }
 
 .opponent-container {
+    position: fixed;
+    top: 50px;
+    left: 50px;
     display: flex;
     justify-content: center;
 }

@@ -24,9 +24,9 @@ public class Card(
     ImageOffsets? imageOffsets = null,
     ImageOffsets? fieldImageOffsets = null)
 {
-    private bool hasBeenEnfeebled = false;
-    private bool hasBeenEnhanced = false;
-    private bool hasHitPower7 = false;
+    public bool HasBeenEnfeebled { get; private set; } = false;
+    public bool HasBeenEnhanced { get; private set; } = false;
+    public bool hasHitPower7 = false;
 
     public readonly string Name = name;
     public readonly bool Replaces = cost == -1;
@@ -41,6 +41,9 @@ public class Card(
     public readonly string Description = description;
 
     public int PowerAdjustment { get; set; } = 0;
+    public int SelfAdjustment { get; set; } = 0;
+
+    public int AdjustedPower => Power + PowerAdjustment + SelfAdjustment;
 
     private readonly int[] rankBoosts = (rankPositions ?? []).Select((position) => 12 + (5 * position.Row) + position.Cell).ToArray();
     public RankOffset[] RankPositions => rankPositions ?? [];
@@ -72,8 +75,8 @@ public class Card(
     {
         get
         {
-            if (hasBeenEnhanced) return Ability.None;
-            hasBeenEnhanced = true;
+            if (HasBeenEnhanced) return Ability.None;
+            HasBeenEnhanced = true;
             return enhanced;
         }
     }
@@ -83,8 +86,8 @@ public class Card(
     {
         get
         {
-            if (hasBeenEnfeebled) return Ability.None;
-            hasBeenEnfeebled = true;
+            if (HasBeenEnfeebled) return Ability.None;
+            HasBeenEnfeebled = true;
             return enfeebled;
         }
     }

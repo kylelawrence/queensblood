@@ -1,12 +1,12 @@
 namespace queensblood;
 
-public class FieldCell(Card? card, int pins, PlayerType owner)
+public class FieldCell(int rowIndex, int cellIndex, int pins, PlayerType owner)
 {
-    public static readonly FieldCell Empty = new(null, 0, PlayerType.Undecided);
-
-    public Card? Card { get; set; } = card;
+    public Card? Card { get; set; } = null;
     public int Pins { get; set; } = pins;
     public PlayerType Owner { get; set; } = owner;
+    public int RowIndex { get; set; } = rowIndex;
+    public int CellIndex { get; set; } = cellIndex;
 
     public Dictionary<string, Tuple<int, PlayerType>> PowerEffects { get; set; } = [];
 

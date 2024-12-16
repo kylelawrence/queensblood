@@ -1,13 +1,8 @@
 @page "/debug"
 @inherits GameWatcher
 <div class="container">
-    <FieldGrid
-        Field="Field"
-        OnFieldClick="HandleFieldClick"
-        GetRowScore="GetRowScore"
-        GetOpponentRowScore="GetOpponentRowScore"
-        CurrentPlayerType="CurrentPlayerType"
-    />
+    <FieldGrid Field="Field" OnFieldClick="HandleFieldClick" GetRowScore="GetRowScore"
+        GetOpponentRowScore="GetOpponentRowScore" CurrentPlayerType="CurrentPlayerType" />
     <div class="opponent-container">
         Play as opponent
         <label class="switch">
@@ -33,6 +28,7 @@
     private PlayerType CurrentPlayerType = PlayerType.Player1;
     private Field Field = Field.None;
     private int CurrentSelectedIndex = -1;
+    private bool IsOpponent = false;
 
     private string GetRowScore(FieldRow row)
     {
@@ -57,7 +53,14 @@
     {
         if (CurrentSelectedIndex == -1) return;
         var card = Cards.At(CurrentSelectedIndex)!;
-        Game.DebugPlayCard(card, Field, rowIndex, cellIndex, CurrentPlayerType);
+        if (IsOpponent)
+        {
+            Game.DebugOpponentPlayCard(card, rowIndex, cellIndex);
+        }
+        else
+        {
+            Game.DebugPlayCard(card, rowIndex, cellIndex);
+        }
     }
 
     private void HandleCardClick(int index)
@@ -76,9 +79,9 @@
 
     private void HandleOpponentChange(ChangeEventArgs e)
     {
-        var isChecked = e.Value as bool? ?? false;
-        CurrentPlayerType = isChecked ? PlayerType.Player2 : PlayerType.Player1;
-        Field = Game.GetField(CurrentPlayerType);
+        IsOpponent = e.Value as bool? ?? false;
+        //CurrentPlayerType = isChecked ? PlayerType.Player2 : PlayerType.Player1;
+        //Field = Game.GetField(CurrentPlayerType);
         StateHasChanged();
     }
 }

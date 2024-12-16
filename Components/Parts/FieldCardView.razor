@@ -1,6 +1,6 @@
 <div class="field-card @(this.MaybeClass("opponent", IsOpponent))">
     <div class="image" style='background-image: url("@(CardModel?.ImageUrl)");@(Transform)'></div>
-    <div class="value">@CardModel?.Power</div>
+    <div class="value">@Power</div>
     <div class="desc">@CardModel?.Description</div>
 </div>
 
@@ -8,6 +8,7 @@
     [Parameter] public Card? CardModel { get; set; } = null;
     [Parameter] public bool IsOpponent { get; set; } = false;
     public string Transform { get; set; } = "";
+    public int Power => Math.Max(0, CardModel?.AdjustedPower ?? 0);
 
     override protected void OnParametersSet()
     {
