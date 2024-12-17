@@ -372,7 +372,8 @@ public class Game
             if (cardPlayedAbility == null) continue;
             if (cardPlayedAbility.TargetType == TargetType.Ally && occupiedCell.Owner != hostCell.Owner) continue;
             if (cardPlayedAbility.TargetType == TargetType.Enemy && occupiedCell.Owner == hostCell.Owner) continue;
-            RunAbility(cardPlayedAbility, occupiedCell.Card!.AbilityPositions, GetField(occupiedCell.Owner), occupiedCell.RowIndex, occupiedCell.CellIndex);
+            var occupiedPosition = occupiedCell.GetPosition();
+            RunAbility(cardPlayedAbility, occupiedCell.Card!.AbilityPositions, GetField(occupiedCell.Owner), occupiedPosition.Row, occupiedPosition.Cell);
         }
     }
 
@@ -386,7 +387,8 @@ public class Game
             if (cardDestroyed == null) continue;
             if (cardDestroyed.TargetType == TargetType.Ally && occupiedCell.Owner != hostCell.Owner) continue;
             if (cardDestroyed.TargetType == TargetType.Enemy && occupiedCell.Owner == hostCell.Owner) continue;
-            RunAbility(cardDestroyed, occupiedCell.Card.AbilityPositions, GetField(occupiedCell.Owner), occupiedCell.RowIndex, occupiedCell.CellIndex);
+            var occupiedPosition = occupiedCell.GetPosition();
+            RunAbility(cardDestroyed, occupiedCell.Card.AbilityPositions, GetField(occupiedCell.Owner), occupiedPosition.Row, occupiedPosition.Cell);
         }
     }
 
@@ -475,7 +477,8 @@ public class Game
                 {
                     powerAdjustment += value;
                     var changedAbility = value > 0 ? cell.Card!.Enhanced : cell.Card!.Enfeebled;
-                    RunAbility(changedAbility, cell.Card.AbilityPositions, GetField(cell.Owner), cell.RowIndex, cell.CellIndex);
+                    var cellPosition = cell.GetPosition();
+                    RunAbility(changedAbility, cell.Card.AbilityPositions, GetField(cell.Owner), cellPosition.Row, cellPosition.Cell);
                 }
             }
 
@@ -660,8 +663,9 @@ public class Game
         if (cell.Card == null) return;
         var field = GetField(cell.Owner);
         var cardPositions = cell.Card.AbilityPositions;
-        UnlingerAbility(cell.Card.InPlay, cardPositions, field, cell.RowIndex, cell.CellIndex);
-        RunAbility(cell.Destroy(), cardPositions, field, cell.RowIndex, cell.CellIndex);
-        RunCardDestroyedAbilities(field, cell.RowIndex, cell.CellIndex);
+        var cellPosition = cell.GetPosition();
+        UnlingerAbility(cell.Card.InPlay, cardPositions, field, cellPosition.Row, cellPosition.Cell);
+        RunAbility(cell.Destroy(), cardPositions, field, cellPosition.Row, cellPosition.Cell);
+        RunCardDestroyedAbilities(field, cellPosition.Row, cellPosition.Cell);
     }
 }
