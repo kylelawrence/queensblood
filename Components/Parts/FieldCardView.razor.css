@@ -36,6 +36,15 @@
     background: rgb(0, 0, 0, 0.75);
 }
 
+.field-card .ability {
+    color: gold;
+    position: absolute;
+    bottom: 0%;
+    left: 3%;
+    font-size: 32px;
+    z-index: 2;
+}
+
 .opponent {
     background: url('/images/red.jpg') center/cover no-repeat;
 }

@@ -11,6 +11,7 @@
         }
     </div>
     <div class="value">@CardModel?.Power</div>
+    <div class="ability">@(CardModel?.HasAbility == true ? "✨" : "")</div>
     <div class="field">
         @for (var i = 0; i < 25; i++)
         {

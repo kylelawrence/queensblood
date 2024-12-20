@@ -1,6 +1,7 @@
 <div class="field-card @(this.MaybeClass("opponent", IsOpponent))">
     <div class="image" style='background-image: url("@(CardModel?.ImageUrl)");@(Transform)'></div>
     <div class="value">@Power</div>
+    <div class="ability">@(CardModel?.HasAbility == true ? "✨" : "")</div>
     <div class="desc">@CardModel?.Description</div>
 </div>
 
