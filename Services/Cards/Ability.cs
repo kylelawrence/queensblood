@@ -12,7 +12,7 @@ public enum Effect
     SpawnCards,
 }
 
-public enum TargetType
+public enum CardRelation
 {
     None,
     Ally,
@@ -29,7 +29,7 @@ public enum ValueType
     Enhanced,
 }
 
-public record Ability(Effect Effect, TargetType TargetType, int Value = 0, ValueType ValueType = ValueType.Power, TargetType TargetTrigger = TargetType.Self)
+public record Ability(Effect Effect, CardRelation TargetType, int Value = 0, ValueType ValueType = ValueType.Power, CardRelation TargetTrigger = CardRelation.Self)
 {
-    public static readonly Ability None = new(Effect.None, TargetType.None);
+    public static readonly Ability None = new(Effect.None, CardRelation.None);
 }
