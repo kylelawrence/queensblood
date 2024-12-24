@@ -24,9 +24,9 @@ public class Card(
     ImageOffsets? imageOffsets = null,
     ImageOffsets? fieldImageOffsets = null)
 {
-    public bool HasBeenEnfeebled { get; private set; } = false;
-    public bool HasBeenEnhanced { get; private set; } = false;
-    public bool hasHitPower7 = false;
+    public bool HasBeenEnfeebled { get; set; } = false;
+    public bool HasBeenEnhanced { get; set; } = false;
+    public bool HasHitPower7 { get; set; } = false;
 
     public readonly string Name = name;
     public readonly bool Replaces = cost == -1;
@@ -58,40 +58,10 @@ public class Card(
     public Ability CardPlayed => cardPlayed ?? Ability.None;
     public Ability LaneWon => laneWon ?? Ability.None;
 
-    private readonly Ability power7 = power7 ?? Ability.None;
-    public Ability Power7
-    {
-        get
-        {
-            if (hasHitPower7) return Ability.None;
-            if (Power < 7) return Ability.None;
-            hasHitPower7 = true;
-            return power7;
-        }
-    }
-
-    private readonly Ability enhanced = enhanced ?? Ability.None;
-    public Ability Enhanced
-    {
-        get
-        {
-            if (HasBeenEnhanced) return Ability.None;
-            HasBeenEnhanced = true;
-            return enhanced;
-        }
-    }
-
-    private readonly Ability enfeebled = enfeebled ?? Ability.None;
-    public Ability Enfeebled
-    {
-        get
-        {
-            if (HasBeenEnfeebled) return Ability.None;
-            HasBeenEnfeebled = true;
-            return enfeebled;
-        }
-    }
-
+    public readonly Ability Power7 = power7 ?? Ability.None;
+    public readonly Ability Enhanced = enhanced ?? Ability.None;
+    public readonly Ability Enfeebled = enfeebled ?? Ability.None;
+    
     public bool HasRankBoost(int index) => rankBoosts.Contains(index);
 
     public bool HasAbilityBoost(int index) => abilityBoosts.Contains(index);

@@ -472,13 +472,32 @@ public class Game
             var powerAdjustment = 0;
             foreach (var (value, target) in cell.PowerEffects.Values)
             {
-                if (target == PlayerType.Undecided || target == cell.Owner)
+                if (target != PlayerType.Undecided && target != cell.Owner) continue;
+
+                powerAdjustment += value;
+                Ability changedAbility = Ability.None;
+                if (value > 0)
                 {
-                    powerAdjustment += value;
-                    var changedAbility = value > 0 ? cell.Card!.Enhanced : cell.Card!.Enfeebled;
-                    var cellPosition = cell.GetPosition();
-                    RunAbility(changedAbility, cell.Card.AbilityPositions, GetField(cell.Owner), cellPosition.Row, cellPosition.Cell);
+                    if (cell.Card!.Power7.Effect != Effect.None && !cell.Card!.HasHitPower7 && cell.Card!.Power + powerAdjustment >= 7)
+                    {
+                        changedAbility = cell.Card!.Power7;
+                        cell.Card!.HasHitPower7 = true;
+                    }
+                    else if (!cell.Card!.HasBeenEnhanced)
+                    {
+                        changedAbility = cell.Card!.Enhanced;
+                    }
+                    cell.Card!.HasBeenEnhanced = true;
+                } else {
+                    if (!cell.Card!.HasBeenEnfeebled)
+                    {
+                        changedAbility = cell.Card!.Enfeebled;
+                    }
+                    cell.Card!.HasBeenEnfeebled = true;
                 }
+                
+                var cellPosition = cell.GetPosition();
+                RunAbility(changedAbility, cell.Card.AbilityPositions, GetField(cell.Owner), cellPosition.Row, cellPosition.Cell);
             }
 
             cell.Card!.PowerAdjustment = powerAdjustment;
@@ -604,13 +623,16 @@ public class Game
             if (ability.TargetType == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
             if (ability.TargetType == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
 
-            targetCell.Card.Enfeeble(ability.Value);
-            RunAbility(targetCell.Card.Enfeebled, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
 
             if (targetCell.Card.Power <= 0)
             {
                 DestroyCard(targetCell);
+                continue;
             }
+
+            targetCell.Card.Enfeeble(ability.Value);
+            RunAbility(targetCell.Card.HasBeenEnfeebled ? Ability.None : targetCell.Card.Enfeebled, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
+            targetCell.Card.HasBeenEnfeebled = true;
         }
     }
 
@@ -620,7 +642,10 @@ public class Game
 
         if (ability.TargetType == CardRelation.Self)
         {
-            cell.Card?.Enhance(ability.Value);
+            if (cell.Card == null) return;
+
+            cell.Card.HasBeenEnhanced = true;
+            cell.Card.Enhance(ability.Value);
             return;
         }
 
@@ -632,9 +657,18 @@ public class Game
             if (ability.TargetType == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
             if (ability.TargetType == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
 
+            if (targetCell.Card.Power7.Effect != Effect.None && !targetCell.Card.HasHitPower7)
+            {
+                targetCell.Card.HasHitPower7 = true;
+                targetCell.Card.HasBeenEnhanced = true;
+                RunAbility(targetCell.Card.Power7, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
+                continue;
+            }
+
             targetCell.Card.Enhance(ability.Value);
+
+            if (targetCell.Card.HasBeenEnhanced) continue;
             RunAbility(targetCell.Card.Enhanced, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
-            RunAbility(targetCell.Card.Power7, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
         }
     }
 
