@@ -78,11 +78,11 @@ public class Game
         for (var rowIndex = 0; rowIndex < Values.ROWS; ++rowIndex)
         {
             FieldCell[] cells = [
-                new FieldCell(rowIndex, 0, 3, PlayerType.Player1),
-                new FieldCell(rowIndex, 1, 3, PlayerType.Player1),
-                new FieldCell(rowIndex, 2, 3, PlayerType.Player1),
-                new FieldCell(rowIndex, 3, 3, PlayerType.Player2),
-                new FieldCell(rowIndex, 4, 3, PlayerType.Player2),
+                new FieldCell(rowIndex, 0, 1, PlayerType.Player1),
+                new FieldCell(rowIndex, 1, 0, PlayerType.Undecided),
+                new FieldCell(rowIndex, 2, 0, PlayerType.Undecided),
+                new FieldCell(rowIndex, 3, 0, PlayerType.Undecided),
+                new FieldCell(rowIndex, 4, 1, PlayerType.Player2),
             ];
             player1Rows[rowIndex] = new FieldRow(cells);
             player2Rows[rowIndex] = new FieldRow(cells.Reverse().ToArray());
