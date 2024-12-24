@@ -78,11 +78,11 @@ public class Game
         for (var rowIndex = 0; rowIndex < Values.ROWS; ++rowIndex)
         {
             FieldCell[] cells = [
-                new FieldCell(rowIndex, 0, 1, PlayerType.Player1),
-                new FieldCell(rowIndex, 1, 0, PlayerType.Undecided),
-                new FieldCell(rowIndex, 2, 0, PlayerType.Undecided),
-                new FieldCell(rowIndex, 3, 0, PlayerType.Undecided),
-                new FieldCell(rowIndex, 4, 1, PlayerType.Player2),
+                new FieldCell(rowIndex, 0, 3, PlayerType.Player1),
+                new FieldCell(rowIndex, 1, 3, PlayerType.Player1),
+                new FieldCell(rowIndex, 2, 3, PlayerType.Player1),
+                new FieldCell(rowIndex, 3, 3, PlayerType.Player2),
+                new FieldCell(rowIndex, 4, 3, PlayerType.Player2),
             ];
             player1Rows[rowIndex] = new FieldRow(cells);
             player2Rows[rowIndex] = new FieldRow(cells.Reverse().ToArray());
@@ -318,28 +318,16 @@ public class Game
             targetCell.Owner = cell.Owner;
         }
 
-        var cardPlayedAbility = card.Played;
-
         // Replacer cards destroy the card they replace
         // And must be played against a cell with a card
         if (card.Replaces)
         {
-            if (cardPlayedAbility.ValueType == ValueType.ReplacedPower)
-            {
-                cardPlayedAbility = new (
-                    cardPlayedAbility.Effect,
-                    cardPlayedAbility.CardTypeToTarget,
-                    cell.Card?.Power ?? 0,
-                    cardPlayedAbility.ValueType,
-                    cardPlayedAbility.TriggeringCardType
-                );
-            }
             DestroyCard(cell);
         }
 
         cell.Card = card;
 
-        RunAbility(cardPlayedAbility, card.AbilityPositions, field, rowIndex, cellIndex);
+        RunAbility(card.Played, card.AbilityPositions, field, rowIndex, cellIndex);
 
         LingerAbility(card.InPlay, card.AbilityPositions, field, rowIndex, cellIndex);
 
@@ -356,14 +344,14 @@ public class Game
         {
             var ability = cell.Card!.InPlay;
             if (ability.Effect == Effect.None) continue;
-            if (ability.CardTypeToTarget != CardRelation.Self) continue;
+            if (ability.TargetType != CardRelation.Self) continue;
 
             var powerAdjustment = 0;
             foreach (var occupiedCell in player1Field.OccupiedCells)
             {
                 if (occupiedCell == cell) continue;
-                if (ability.TriggeringCardType == CardRelation.Ally && occupiedCell.Owner != cell.Owner) continue;
-                if (ability.TriggeringCardType == CardRelation.Enemy && occupiedCell.Owner == cell.Owner) continue;
+                if (ability.TargetTrigger == CardRelation.Ally && occupiedCell.Owner != cell.Owner) continue;
+                if (ability.TargetTrigger == CardRelation.Enemy && occupiedCell.Owner == cell.Owner) continue;
                 if (ability.ValueType == ValueType.Enhanced && !occupiedCell.Card!.HasBeenEnhanced) continue;
                 if (ability.ValueType == ValueType.Enfeebled && !occupiedCell.Card!.HasBeenEnfeebled) continue;
                 powerAdjustment += ability.Value;
@@ -381,8 +369,8 @@ public class Game
             if (occupiedCell == hostCell) continue;
             var cardPlayedAbility = occupiedCell.Card!.CardPlayed;
             if (cardPlayedAbility == null) continue;
-            if (cardPlayedAbility.TriggeringCardType == CardRelation.Ally && occupiedCell.Owner != hostCell.Owner) continue;
-            if (cardPlayedAbility.TriggeringCardType == CardRelation.Enemy && occupiedCell.Owner == hostCell.Owner) continue;
+            if (cardPlayedAbility.TargetTrigger == CardRelation.Ally && occupiedCell.Owner != hostCell.Owner) continue;
+            if (cardPlayedAbility.TargetTrigger == CardRelation.Enemy && occupiedCell.Owner == hostCell.Owner) continue;
             var occupiedPosition = occupiedCell.GetPosition();
             RunAbility(cardPlayedAbility, occupiedCell.Card!.AbilityPositions, GetField(occupiedCell.Owner), occupiedPosition.Row, occupiedPosition.Cell);
         }
@@ -396,8 +384,8 @@ public class Game
             if (occupiedCell == hostCell) continue;
             var cardDestroyed = occupiedCell.Card!.CardDestroyed;
             if (cardDestroyed == null) continue;
-            if (cardDestroyed.TriggeringCardType == CardRelation.Ally && occupiedCell.Owner != hostCell.Owner) continue;
-            if (cardDestroyed.TriggeringCardType == CardRelation.Enemy && occupiedCell.Owner == hostCell.Owner) continue;
+            if (cardDestroyed.TargetTrigger == CardRelation.Ally && occupiedCell.Owner != hostCell.Owner) continue;
+            if (cardDestroyed.TargetTrigger == CardRelation.Enemy && occupiedCell.Owner == hostCell.Owner) continue;
             var occupiedPosition = occupiedCell.GetPosition();
             RunAbility(cardDestroyed, occupiedCell.Card.AbilityPositions, GetField(occupiedCell.Owner), occupiedPosition.Row, occupiedPosition.Cell);
         }
@@ -447,7 +435,7 @@ public class Game
         var hostCell = field.Rows[rowIndex].Cells[cellIndex];
 
         if (ability.Effect == Effect.None) return;
-        if (ability.CardTypeToTarget == CardRelation.Self) return;
+        if (ability.TargetType == CardRelation.Self) return;
 
         foreach (var targetPosition in GetTargetPositions(rowIndex, cellIndex, positions))
         {
@@ -457,8 +445,8 @@ public class Game
 
             // Target type of both is defaulted as undecided
             PlayerType targetPlayerType = PlayerType.Undecided;
-            if (ability.CardTypeToTarget == CardRelation.Ally) targetPlayerType = hostCell.Owner;
-            if (ability.CardTypeToTarget == CardRelation.Enemy) targetPlayerType = GetOpponent(hostCell.Owner);
+            if (ability.TargetType == CardRelation.Ally) targetPlayerType = hostCell.Owner;
+            if (ability.TargetType == CardRelation.Enemy) targetPlayerType = GetOpponent(hostCell.Owner);
 
             targetCell.PowerEffects[cellKey] = new(value, targetPlayerType);
         }
@@ -613,8 +601,8 @@ public class Game
             var targetCell = field.Rows[targetPosition.Row].Cells[targetPosition.Cell];
             if (targetCell.Card == null) continue;
 
-            if (ability.CardTypeToTarget == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
-            if (ability.CardTypeToTarget == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
+            if (ability.TargetType == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
+            if (ability.TargetType == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
 
             targetCell.Card.Enfeeble(ability.Value);
             RunAbility(targetCell.Card.Enfeebled, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
@@ -630,7 +618,7 @@ public class Game
     {
         var cell = field.Rows[rowIndex].Cells[cellIndex];
 
-        if (ability.CardTypeToTarget == CardRelation.Self)
+        if (ability.TargetType == CardRelation.Self)
         {
             cell.Card?.Enhance(ability.Value);
             return;
@@ -641,11 +629,12 @@ public class Game
             var targetCell = field.Rows[targetPosition.Row].Cells[targetPosition.Cell];
             if (targetCell.Card == null) continue;
 
-            if (ability.CardTypeToTarget == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
-            if (ability.CardTypeToTarget == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
+            if (ability.TargetType == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
+            if (ability.TargetType == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
 
             targetCell.Card.Enhance(ability.Value);
             RunAbility(targetCell.Card.Enhanced, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
+            RunAbility(targetCell.Card.Power7, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
         }
     }
 
@@ -658,8 +647,8 @@ public class Game
             var targetCell = field.Rows[targetPosition.Row].Cells[targetPosition.Cell];
             if (targetCell.Card == null) continue;
 
-            if (ability.CardTypeToTarget == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
-            if (ability.CardTypeToTarget == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
+            if (ability.TargetType == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
+            if (ability.TargetType == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
 
             DestroyCard(targetCell);
         }
