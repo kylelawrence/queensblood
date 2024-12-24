@@ -17,7 +17,6 @@ public class Card(
     Ability? laneWon = null,
     Ability? enhanced = null,
     Ability? enfeebled = null,
-    Ability? power7 = null,
     int rankBoost = 1,
     bool legendary = false,
     string description = "This card has no abilities.",
@@ -25,8 +24,7 @@ public class Card(
     ImageOffsets? fieldImageOffsets = null)
 {
     public bool HasBeenEnfeebled { get; private set; } = false;
-    public bool HasBeenEnhanced { get; private set; } = false;
-    public bool hasHitPower7 = false;
+    public bool HasBeenEnhanced { get; protected set; } = false;
 
     public readonly string Name = name;
     public readonly bool Replaces = cost == -1;
@@ -36,7 +34,7 @@ public class Card(
     public readonly ImageOffsets FieldImageOffsets = fieldImageOffsets ?? new();
     public int Power { get; private set; } = power;
     public readonly int RankBoost = rankBoost;
-    public readonly bool HasAbility = inPlay != null || played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || enhanced != null || enfeebled != null || power7 != null;
+    public readonly bool HasAbility = inPlay != null || played != null || destroyed != null || cardDestroyed != null || cardPlayed != null || laneWon != null || enhanced != null || enfeebled != null;
     public readonly bool Legendary = legendary;
     public readonly string Description = description;
 
@@ -58,19 +56,7 @@ public class Card(
     public Ability CardPlayed => cardPlayed ?? Ability.None;
     public Ability LaneWon => laneWon ?? Ability.None;
 
-    private readonly Ability power7 = power7 ?? Ability.None;
-    public Ability Power7
-    {
-        get
-        {
-            if (hasHitPower7) return Ability.None;
-            if (Power < 7) return Ability.None;
-            hasHitPower7 = true;
-            return power7;
-        }
-    }
-
-    private readonly Ability enhanced = enhanced ?? Ability.None;
+    protected readonly Ability enhanced = enhanced ?? Ability.None;
     public Ability Enhanced
     {
         get

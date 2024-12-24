@@ -27,9 +27,10 @@ public enum ValueType
     ReplacedPower,
     Enfeebled,
     Enhanced,
+    EnhancedOrEnfeebled,
 }
 
-public record Ability(Effect Effect, CardRelation TargetType, int Value = 0, ValueType ValueType = ValueType.Power, CardRelation TargetTrigger = CardRelation.Self)
+public record Ability(Effect Effect, CardRelation CardTypeToTarget, int Value = 0, ValueType ValueType = ValueType.Power, CardRelation TriggeringCardType = CardRelation.Self)
 {
     public static readonly Ability None = new(Effect.None, CardRelation.None);
 }
