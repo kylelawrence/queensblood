@@ -637,14 +637,13 @@ public class Game
             if (ability.TargetType == CardRelation.Enemy && targetCell.Owner == cell.Owner) continue;
             if (ability.TargetType == CardRelation.Ally && targetCell.Owner != cell.Owner) continue;
 
-
-            if (targetCell.Card.Power <= 0)
+            targetCell.Card.Enfeeble(ability.Value);
+            if (targetCell.Card.AdjustedPower <= 0)
             {
                 DestroyCard(targetCell);
                 continue;
             }
 
-            targetCell.Card.Enfeeble(ability.Value);
             RunAbility(targetCell.Card.HasBeenEnfeebled ? Ability.None : targetCell.Card.Enfeebled, targetCell.Card.AbilityPositions, field, targetPosition.Row, targetPosition.Cell);
             targetCell.Card.HasBeenEnfeebled = true;
         }

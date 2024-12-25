@@ -68,7 +68,7 @@ public class Card(
 
     public void Enfeeble(int amount)
     {
-        Power = Math.Max(0, Power - amount);
+        Power -= amount;
     }
 
     public void Enhance(int amount)
