@@ -15,7 +15,7 @@ public static class Cards
 
     public static Func<Card>[] CardsToSpawn(int cardSpawnValue)
     {
-        return minions.ElementAtOrDefault(cardSpawnValue) ?? [];
+        return spawns.ElementAtOrDefault(cardSpawnValue) ?? [];
     }
 
     public static int Count => cards.Length;

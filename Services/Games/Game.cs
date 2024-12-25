@@ -488,14 +488,16 @@ public class Game
                         changedAbility = cell.Card!.Enhanced;
                     }
                     cell.Card!.HasBeenEnhanced = true;
-                } else {
+                }
+                else
+                {
                     if (!cell.Card!.HasBeenEnfeebled)
                     {
                         changedAbility = cell.Card!.Enfeebled;
                     }
                     cell.Card!.HasBeenEnfeebled = true;
                 }
-                
+
                 var cellPosition = cell.GetPosition();
                 RunAbility(changedAbility, cell.Card.AbilityPositions, GetField(cell.Owner), cellPosition.Row, cellPosition.Cell);
             }
@@ -527,6 +529,7 @@ public class Game
         var owner = cell.Owner;
 
         var cardSpawns = Cards.CardsToSpawn(ability.Value);
+        List<CellPosition> spawnLocations = [];
         var cardSpawnIndex = 0;
         for (var spawnRow = 0; spawnRow < Values.ROWS; ++spawnRow)
         {
@@ -535,12 +538,23 @@ public class Game
                 var cellToSpawn = field.Rows[spawnRow].Cells[spawnCell];
                 if (cellToSpawn.Card != null) continue;
                 if (cellToSpawn.Owner != owner) continue;
-
-                var cardMaker = cardSpawns[cardSpawnIndex >= cardSpawns.Length ? 0 : cardSpawnIndex];
-                cardSpawnIndex++;
-
-                PlaceCard(cardMaker(), field, spawnRow, spawnCell);
+                spawnLocations.Add(new(spawnRow, spawnCell));
             }
+        }
+
+        // Shuffle spawn locations
+        for (var i = spawnLocations.Count - 1; i > 0; --i)
+        {
+            var j = random.Next(i + 1);
+            (spawnLocations[j], spawnLocations[i]) = (spawnLocations[i], spawnLocations[j]);
+        }
+
+        foreach (var (spawnRow, spawnCell) in spawnLocations)
+        {
+            var cardMaker = cardSpawns[cardSpawnIndex >= cardSpawns.Length ? 0 : cardSpawnIndex];
+            cardSpawnIndex++;
+
+            PlaceCard(cardMaker(), field, spawnRow, spawnCell);
         }
     }
 
