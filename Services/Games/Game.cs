@@ -1,3 +1,5 @@
+using queensblood.Components.Pages;
+
 namespace queensblood;
 
 public record CellPosition(int Row, int Cell);
@@ -36,7 +38,7 @@ public class Game
 
     public GameState State { get; private set; } = GameState.PickingDecks;
 
-    public bool IsActive => Id != "" && DateTime.Now.Subtract(TimeSpan.FromMinutes(Values.ACTIVE_MINUTES)) < LastUpdated;
+    public bool IsActive => Id != "" && State != GameState.GameOver && DateTime.Now.Subtract(TimeSpan.FromMinutes(Values.ACTIVE_MINUTES)) < LastUpdated;
 
     public event EventHandler OnGameUpdated = delegate { };
 
@@ -67,6 +69,9 @@ public class Game
     public bool PlayerHasSkipped = false;
 
     public PlayerType Winner { get; private set; } = PlayerType.Undecided;
+
+    private int player1FinalScore = 0;
+    private int player2FinalScore = 0;
 
     public Game(string id, string player1Id)
     {
@@ -212,21 +217,22 @@ public class Game
             // Game over time, let's calculate scores
             foreach (var row in player1Field.Rows)
             {
-                var player1RowScore = row.Player1Score;
-                var player2RowScore = row.Player2Score;
-                if (player1RowScore > player2RowScore)
+                if (row.Player1Score > row.Player2Score)
                 {
-                    player1RowScore += row.Cells.Sum((cell) => cell.Owner == PlayerType.Player1 ? (cell.Card?.LaneWon?.Value ?? 0) : 0);
-                    if (partyAnimalActive) player1RowScore += player2RowScore;
+                    row.Player1ScoreAdjustment = row.Cells.Sum((cell) => cell.Owner == PlayerType.Player1 ? (cell.Card?.LaneWon?.Value ?? 0) : 0);
+                    if (partyAnimalActive) row.Player1ScoreAdjustment += row.Player2Score;
+                    player1Score += row.Player1Score;
                 }
-                if (player2RowScore > player1RowScore)
+                if (row.Player2Score > row.Player1Score)
                 {
-                    player2RowScore += row.Cells.Sum((cell) => cell.Owner == PlayerType.Player2 ? (cell.Card?.LaneWon?.Value ?? 0) : 0);
-                    if (partyAnimalActive) player2RowScore += player1RowScore;
+                    row.Player2ScoreAdjustment = row.Cells.Sum((cell) => cell.Owner == PlayerType.Player2 ? (cell.Card?.LaneWon?.Value ?? 0) : 0);
+                    if (partyAnimalActive) row.Player2ScoreAdjustment += row.Player1Score;
+                    player2Score += row.Player2Score;
                 }
-                player1Score += player1RowScore;
-                player2Score += player2RowScore;
             }
+
+            player1FinalScore = player1Score;
+            player2FinalScore = player2Score;
 
             State = GameState.GameOver;
             Winner = PlayerType.Undecided;
@@ -428,7 +434,7 @@ public class Game
         }
     }
 
-    private static PlayerType GetOpponent(PlayerType playerType) => playerType == PlayerType.Player1 ? PlayerType.Player2 : PlayerType.Player1;
+    public static PlayerType GetOpponent(PlayerType playerType) => playerType == PlayerType.Player1 ? PlayerType.Player2 : PlayerType.Player1;
 
     private static void LingerAbility(Ability ability, RankOffset[] positions, Field field, int rowIndex, int cellIndex)
     {
@@ -710,5 +716,12 @@ public class Game
         UnlingerAbility(cell.Card.InPlay, cardPositions, field, cellPosition.Row, cellPosition.Cell);
         RunAbility(cell.Destroy(), cardPositions, field, cellPosition.Row, cellPosition.Cell);
         RunCardDestroyedAbilities(field, cellPosition.Row, cellPosition.Cell);
+    }
+
+    public int GetFinalScore(PlayerType playerType)
+    {
+        if (playerType == PlayerType.Player1) return player1FinalScore;
+        if (playerType == PlayerType.Player2) return player2FinalScore;
+        return 0;
     }
 }

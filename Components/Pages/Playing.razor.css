@@ -4,6 +4,30 @@
     width: 100%;
 }
 
+.field-grid-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    /* stretch */
+    justify-content: center;
+    gap: 50px;
+}
+
+.final-score {
+    border: 0;
+    display: flex;
+    /* center */
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.final-score>div {
+    text-align: center;
+    font-size: 30px;
+}
+
 .hands {
     display: flex;
     flex-direction: column;
@@ -17,31 +41,6 @@
     flex-direction: row;
     gap: 10px;
     padding-right: 4px;
-}
-
-.field-grid-container {
-    flex-grow: 1;
-    display: grid;
-    place-items: center;
-}
-
-.field-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 100px);
-    grid-template-rows: repeat(3, 160px);
-    border: solid 8px silver;
-}
-
-.cell {
-    all: unset;
-    font-size: 30px;
-    font-weight: bold;
-    text-align: center;
-    color: royalblue;
-}
-
-.cell.opponent {
-    color: red;
 }
 
 .center-label {
@@ -73,29 +72,6 @@
     font-weight: bold;
     border-radius: 10px;
     border: solid 3px silver;
-}
-
-.field-card {
-    background: #444;
-}
-
-.c00,
-.c02,
-.c04,
-.c11,
-.c13,
-.c20,
-.c22,
-.c24 {
-    background: gainsboro;
-}
-
-.score {
-    border: solid 4px #222;
-    box-shadow: 1px 1px 5px #111 inset;
-    display: grid;
-    place-items: center;
-    color: silver;
 }
 
 .turn-label {
