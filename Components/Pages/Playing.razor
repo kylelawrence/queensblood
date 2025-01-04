@@ -4,7 +4,7 @@
 <div style="flex-grow: 1; display: flex;">
     @if (Game.State == GameState.PickingDecks)
     {
-            <div class="middle full-width">
+            <div class="middle full-width waiting">
                 Waiting for other player...
             </div>
     }
@@ -234,5 +234,11 @@
 
         Game.Forfeit(CurrentPlayerId);
         navigationManager.NavigateTo("/");
+    }
+
+    protected override void HandleGameUpdated(object? sender, EventArgs e)
+    {
+        forfeitClicked = false;
+        base.HandleGameUpdated(sender, e);
     }
 }

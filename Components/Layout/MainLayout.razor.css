@@ -28,17 +28,18 @@
 }
 
 .home {
+	color: white;
 	cursor: pointer;
 	border: solid 3px #999;
-	border-radius: 100%;
-	padding: 5px;
+	border-radius: 15px;
+	padding: 5px 10px;
 	position: fixed;
 	top: 0px;
 	left: 40px;
-	width: 35px;
 	height: 35px;
 	background: #333;
-	display: grid;
+	display: flex;
+	flex-direction: column;
 	align-items: center;
 	line-height: 18px;
 }

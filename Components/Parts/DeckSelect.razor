@@ -1,9 +1,13 @@
 @inject IDecksService decksService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <div class="container">
     <div class="decks-header">
         <span>Choose deck:</span>
         <DeckSelectButtons SelectedDeck="selectedDeckIndex" OnDeckClicked="SelectDeck" />
+        <div class="copied @this.MaybeClass("show", this.copied)"><span>Copied!</span></div>
+        <button type="button" class="copylink" @onclick="HandleCopyLink">Copy invite link</button>
         <button type="button" class="start" @onclick="HandleStartClick">Start game</button>
     </div>
     <div class="all-cards">
@@ -24,6 +28,8 @@
     private int selectedDeckIndex = 0;
     private Deck selectedDeck = new([]);
 
+    private bool copied = false;
+
     protected override async Task OnInitializedAsync()
     {
         selectedDeckIndex = await decksService.GetSelectedDeck();
@@ -40,5 +46,13 @@
     public void HandleStartClick()
     {
         OnStartGame(selectedDeck);
+    }
+
+    public void HandleCopyLink()
+    {
+        var url = NavigationManager.Uri;
+        JSRuntime.InvokeVoidAsync("navigator.clipboard.writeText", url);
+        copied = true;
+        StateHasChanged();
     }
 }

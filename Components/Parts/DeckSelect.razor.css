@@ -14,21 +14,55 @@
     gap: 20px;
 }
 
-.start {
+.copied {
     margin-left: auto;
-    background: gold;
-    color: #222;
-    width: 100px;
-    height: 35px;
+}
+
+.copied>span {
+    display: none;
+}
+
+.copied.show>span {
+    display: inline;
+}
+
+.copylink {
+    background-color: transparent;
+    color: white;
+    padding: 5px 15px;
+    height: 50px;
     font-weight: bold;
+    font-size: 20px;
     border-radius: 10px;
     border: solid 3px silver;
     cursor: pointer;
 }
 
+.copylink:hover {
+    background: white;
+    color: #222;
+}
+
+.start {
+    background-color: transparent;
+    color: gold;
+    padding: 5px 15px;
+    height: 50px;
+    font-weight: bold;
+    font-size: 20px;
+    border-radius: 10px;
+    border: solid 3px silver;
+    cursor: pointer;
+}
+
+.start:hover {
+    background: gold;
+    color: #222;
+}
+
 .all-cards {
     flex-grow: 1;
-    border: solid 3px silver; 
+    border: solid 3px silver;
     border-radius: 10px;
     height: 1px;
     display: flex;

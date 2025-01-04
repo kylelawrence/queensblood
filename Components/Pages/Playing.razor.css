@@ -13,6 +13,10 @@
     gap: 50px;
 }
 
+.waiting {
+    font-size: 30px;
+}
+
 .final-score {
     border: 0;
     display: flex;

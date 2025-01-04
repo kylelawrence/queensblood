@@ -23,7 +23,7 @@ public class GameWatcher : ComponentBase, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private void HandleGameUpdated(object? sender, EventArgs e)
+    protected virtual void HandleGameUpdated(object? sender, EventArgs e)
     {
         if (!CircuitHandler.IsConnected())
         {
