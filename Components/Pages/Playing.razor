@@ -4,64 +4,64 @@
 <div style="flex-grow: 1; display: flex;">
     @if (Game.State == GameState.PickingDecks)
     {
-            <div class="middle full-width waiting">
-                Waiting for other player...
-            </div>
+        <div class="middle full-width waiting">
+            Waiting for other player...
+        </div>
     }
     else
     {
-            <div class="container">
-                <div class="field-grid-container">
-                    @if (Game.State == GameState.GameOver)
-                    {
-                        <div class="final-score">
-                            <div class="score-label">Total</div>
-                            <div class="score-value">@Game.GetFinalScore(CurrentPlayerType)</div>
-                        </div>
-                    }
-                    <FieldGrid
-                        Field="Field"
-                        OnFieldClick="HandleFieldClick"
-                        GetRowScore="GetRowScore"
-                        GetOpponentRowScore="GetOpponentRowScore"
-                        CurrentPlayerType="CurrentPlayerType"
-                    />
-                    @if (Game.State == GameState.GameOver)
-                    {
-                        <div class="final-score">
-                            <div class="score-label">Total</div>
-                            <div class="score-value">@Game.GetFinalScore(Game.GetOpponent(CurrentPlayerType))</div>
-                        </div>
-                    }
-                </div>
-                <div class="hands">
-                    <div class="hand">
-                    @for (var i = 0; i < Hand.Count; i++)
-                    {
-                        var index = i;
-                        var onClick = (Card _) => HandleCardClick(index);
-                        var mulliganSelected = Game.State == GameState.Mulligan && IndexesSelectedForMulligan.Contains(index);
-                        var playSelected = CurrentSelectedIndex == index;
-                        var selected = mulliganSelected || playSelected;
-                                <CardView CardModel="@Hand[index]" OnClick="onClick" Selected="selected" />
-                    }
+        <div class="container">
+            <div class="field-grid-container">
+                @if (Game.State == GameState.GameOver)
+                {
+                    <div class="final-score">
+                        <div class="score-label">Total</div>
+                        <div class="score-value">@Game.GetFinalScore(CurrentPlayerType)</div>
                     </div>
+                }
+                <FieldGrid
+                    Field="Field"
+                    OnFieldClick="HandleFieldClick"
+                    GetRowScore="GetRowScore"
+                    GetOpponentRowScore="GetOpponentRowScore"
+                    CurrentPlayerType="CurrentPlayerType"
+                />
+                @if (Game.State == GameState.GameOver)
+                {
+                    <div class="final-score">
+                        <div class="score-label">Total</div>
+                        <div class="score-value">@Game.GetFinalScore(Game.GetOpponent(CurrentPlayerType))</div>
+                    </div>
+                }
+            </div>
+            <div class="hands">
+                <div class="hand">
+                @for (var i = 0; i < Hand.Count; i++)
+                {
+                    var index = i;
+                    var onClick = (Card _) => HandleCardClick(index);
+                    var mulliganSelected = Game.State == GameState.Mulligan && IndexesSelectedForMulligan.Contains(index);
+                    var playSelected = CurrentSelectedIndex == index;
+                    var selected = mulliganSelected || playSelected;
+                    <CardView CardModel="@Hand[index]" OnClick="onClick" Selected="@selected" />
+                }
                 </div>
             </div>
+        </div>
         @if (Game.State == GameState.Mulligan)
         {
             @if (HasMulliganed)
             {
-                            <div class="middle center-label">
-                                <div>Waiting for other player...</div>
-                            </div>
+                <div class="middle center-label">
+                    <div>Waiting for other player...</div>
+                </div>
             }
             else
             {
-                            <div class="middle center-label">
-                                <div>Mulligan - Pick cards to redraw</div>
-                            </div>
-                            <button type="button" class="mulligan-button" @onclick="HandleMulligan">Redraw cards and start game</button>
+                <div class="middle center-label">
+                    <div>Mulligan - Pick cards to redraw</div>
+                </div>
+                <button type="button" class="mulligan-button" @onclick="HandleMulligan">Redraw cards and start game</button>
             }
         }
         else if (Game.State == GameState.GameOver)
@@ -81,41 +81,41 @@
                 label = winner == CurrentPlayerType ? "You won" : "You lost";
             }
 
-                    <div class="middle center-label">
-                        <div>@label</div>
-                    </div>
+            <div class="middle center-label">
+                <div>@label</div>
+            </div>
         }
         else if (Game.State == GameState.Playing)
         {
             if (CurrentPlayerType == Game.PlayerTurn)
             {
-                            <div class="turn-label">
-                                <div>Your turn</div>
+                <div class="turn-label">
+                    <div>Your turn</div>
                     @if (Game.PlayerHasSkipped)
                     {
-                                       <div>Your opponent has skipped.</div>
-                                       <div>If you skip, the game will end.</div> 
+                        <div>Your opponent has skipped.</div>
+                        <div>If you skip, the game will end.</div> 
                     }
-                                <button type="button" class="skip-button" @onclick="HandleSkip">@(skipClicked ? "Confirm?" : "Skip turn")</button>
-                            </div>
+                    <button type="button" class="skip-button" @onclick="HandleSkip">@(skipClicked ? "Confirm?" : "Skip turn")</button>
+                </div>
                 if (!Game.HasAvailableCellToPlay(CurrentPlayerId))
                 {
-                                    <div class="middle center-label">
-                                        <div>You have no cards you can play. Please skip.</div>
-                                    </div>
+                    <div class="middle center-label">
+                        <div>You have no cards you can play. Please skip.</div>
+                    </div>
                 }
             }
             else
             {
-                            <div class="turn-label">
-                                Opponent's turn
-                            </div>
+                <div class="turn-label">
+                    Opponent's turn
+                </div>
             }
         }
     }
     @if (Game.State != GameState.GameOver)
     {
-            <button type="button" class="forfeit-button" @onclick="HandleForfeitClick">@(forfeitClicked ? "Confirm?" : "Forfeit")</button>
+        <button type="button" class="forfeit-button" @onclick="HandleForfeitClick">@(forfeitClicked ? "Confirm?" : "Forfeit")</button>
     }
 </div>
 

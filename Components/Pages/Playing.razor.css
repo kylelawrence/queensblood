@@ -35,16 +35,24 @@
 .hands {
     display: flex;
     flex-direction: column;
-    height: 230px;
+    height: 260px;
     justify-content: space-between;
-    margin-bottom: 20px;
+    margin-right: 25%;
+    padding-top: 20px;
+    overflow-x: auto;
 }
 
 .hand {
-    display: flex;
-    flex-direction: row;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(10px, max-content));
     gap: 10px;
-    padding-right: 4px;
+    padding-right: 100px;
+}
+
+.hand ::deep .card.selected {
+    top: -15px;
+    z-index: 2;
 }
 
 .center-label {
@@ -68,7 +76,7 @@
 .mulligan-button {
     position: fixed;
     right: 10%;
-    bottom: 10%;
+    bottom: 15%;
     background: gold;
     color: #222;
     width: 200px;
@@ -81,7 +89,7 @@
 .turn-label {
     position: fixed;
     right: 10%;
-    bottom: 10%;
+    bottom: 15%;
     text-align: center;
 }
 
@@ -99,7 +107,7 @@
 
 .forfeit-button {
     all: unset;
-    position:absolute;
+    position: absolute;
     opacity: .4;
     top: 20px;
     right: 20px;
