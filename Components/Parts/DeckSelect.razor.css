@@ -14,6 +14,10 @@
     gap: 20px;
 }
 
+.choose-label {
+    font-size: 20px;
+}
+
 .copied {
     margin-left: auto;
 }

@@ -4,7 +4,7 @@
 
 <div class="container">
     <div class="decks-header">
-        <span>Choose deck:</span>
+        <span class="choose-label">Choose deck:</span>
         <DeckSelectButtons SelectedDeck="selectedDeckIndex" OnDeckClicked="SelectDeck" />
         <div class="copied @this.MaybeClass("show", this.copied)"><span>Copied!</span></div>
         <button type="button" class="copylink" @onclick="HandleCopyLink">Copy invite link</button>
