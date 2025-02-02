@@ -317,7 +317,7 @@ public class Game
 
             if (targetRowIndex < 0 || targetRowIndex >= Values.ROWS || targetCellIndex < 0 || targetCellIndex >= Values.COLUMNS) continue;
 
-            var targetCell = field.Rows[targetRowIndex].Cells[targetCellIndex];
+            var targetCell = field.Rows[targetRowIndex].Cells[targetRowIndex];
             if (targetCell.Card != null) continue;
 
             targetCell.Pins = Math.Min(3, targetCell.Pins + card.RankBoost);
